@@ -1,0 +1,17 @@
+{
+  "project": {
+    "name": "your-project-name",
+    "version": "0.1.0",
+    "language": "rust",
+    "repository": "https://github.com/user/repo"
+  },
+  "session": {
+    "cache_enabled": true,
+    "auto_save": true
+  },
+  "preferences": {
+    "edition": "2021",
+    "test_framework": "cargo",
+    "formatter": "rustfmt"
+  }
+}

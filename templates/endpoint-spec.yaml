@@ -1,0 +1,142 @@
+# Template: Endpoint Specification
+# Location: spec/primitives/NN-endpoint-name.yaml
+
+# Endpoint metadata
+endpoint: METHOD /api/endpoint-path
+complexity: simple | medium | complex
+streaming: false  # or true
+status: draft | ready | implemented
+
+# Brief description
+description: |
+  What this endpoint does and when to use it.
+
+# Request specification
+request:
+  type: EndpointRequest  # Rust type name
+
+  fields:
+    # Required field
+    - name: model
+      type: String
+      required: true
+      description: The model name to use
+
+    # Optional field
+    - name: prompt
+      type: Option<String>
+      required: false
+      description: The input prompt
+      default: null
+
+    # Field with default
+    - name: stream
+      type: bool
+      required: false
+      description: Whether to stream the response
+      default: false
+
+    # Enum field
+    - name: format
+      type: Option<Format>
+      required: false
+      description: Output format
+      values: [json, text]
+
+    # Nested object
+    - name: options
+      type: Option<Options>
+      required: false
+      description: Model parameters
+      nested:
+        - name: temperature
+          type: f32
+          description: Sampling temperature
+
+  validation:
+    - Model name must not be empty
+    - Temperature must be between 0.0 and 2.0
+
+  example: |
+    {
+      "model": "llama3",
+      "prompt": "Hello, world!",
+      "stream": false
+    }
+
+# Response specification
+response:
+  type: EndpointResponse  # Rust type name
+
+  fields:
+    - name: model
+      type: String
+      description: The model used
+
+    - name: response
+      type: String
+      description: The generated text
+
+    - name: done
+      type: bool
+      description: Whether generation is complete
+
+    - name: context
+      type: Option<Vec<i64>>
+      description: Context tokens for continuation
+
+  example: |
+    {
+      "model": "llama3",
+      "response": "Hello! How can I help you?",
+      "done": true
+    }
+
+# Streaming response (if streaming: true)
+streaming_response:
+  type: EndpointChunk
+
+  fields:
+    - name: model
+      type: String
+      description: The model used
+
+    - name: response
+      type: String
+      description: Partial response text
+
+    - name: done
+      type: bool
+      description: Whether this is the final chunk
+
+  example: |
+    {"model":"llama3","response":"Hello","done":false}
+    {"model":"llama3","response":"!","done":false}
+    {"model":"llama3","response":"","done":true}
+
+# Error responses
+errors:
+  - status: 400
+    condition: Invalid request parameters
+    example: |
+      {"error": "model is required"}
+
+  - status: 404
+    condition: Model not found
+    example: |
+      {"error": "model 'unknown' not found"}
+
+  - status: 500
+    condition: Internal server error
+    example: |
+      {"error": "internal error"}
+
+# Implementation notes
+notes: |
+  - Any special handling required
+  - Edge cases to consider
+  - Related endpoints
+
+# Dependencies
+depends_on: []  # List of endpoints this depends on
+blocks: []      # List of endpoints blocked by this
