@@ -1,186 +1,236 @@
-# Phase 3: Implementation
+# Phase 3: API Implementation
 
 **Version Target:** v0.3.0
-**Focus:** HTTP methods, async/sync variants, error handling
+**Focus:** Trait-based API, async/sync variants, retry helpers, endpoint constants
 
 ## Objectives
 
-1. Implement HTTP methods for all endpoints
-2. Provide async and sync variants
-3. Implement proper error handling
+1. Implement trait methods for all endpoints on `OllamaApiAsync` and `OllamaApiSync`
+2. Use generic retry helpers for all HTTP operations
+3. Use `_blocking` suffix for all sync methods
 4. Add streaming support (where applicable)
 
 ## Prerequisites
 
-- Phase 1 completed (foundation)
-- Phase 2 completed (primitives)
+- Phase 1 completed (foundation, client, retry helpers)
+- Phase 2 completed (all types defined and tested)
 - All types defined and tested
 
 ## Implementation Order
 
 Process endpoints by complexity:
 
-1. **Simple endpoints** (GET, no body)
-2. **Medium endpoints** (POST, simple body)
-3. **Complex endpoints** (POST, streaming)
+| Order | Complexity | Endpoints | Retry Helper |
+|-------|-----------|-----------|--------------|
+| 1 | Simple GET | version, tags, ps | `get_with_retry` |
+| 2 | Simple POST (empty response) | copy, delete | `post_empty_with_retry`, `delete_empty_with_retry` |
+| 3 | Medium POST | show, embed | `post_with_retry` |
+| 4 | Complex POST | generate, chat | `post_with_retry` |
+| 5 | Complex POST (model ops) | create, pull, push | `post_with_retry` |
 
-## HTTP Method Implementation
+## Trait-Based API Pattern
 
-### Simple GET Endpoint
+### Async Trait Definition
+
 ```rust
-// src/http/endpoints/version.rs
+// src/http/api_async.rs
 
-impl Client {
-    /// Get the API version.
-    pub async fn version(&self) -> Result<VersionResponse> {
-        let url = self.url("/api/version");
+use async_trait::async_trait;
+use crate::{Result, VersionResponse, ChatRequest, ChatResponse};
 
-        let response = self.http()
-            .get(&url)
-            .send()
-            .await?;
+#[async_trait]
+pub trait OllamaApiAsync {
+    /// Get the Ollama server version
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use ollama_oxide::{OllamaClient, OllamaApiAsync};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = OllamaClient::default()?;
+    /// let version = client.version().await?;
+    /// println!("Version: {}", version.version);
+    /// # Ok(())
+    /// # }
+    /// ```
+    async fn version(&self) -> Result<VersionResponse>;
 
-        self.handle_response(response).await
+    /// Send a chat request
+    async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse>;
+
+    // Feature-gated methods
+    #[cfg(feature = "model")]
+    async fn list_models(&self) -> Result<ListResponse>;
+
+    #[cfg(feature = "model")]
+    async fn copy_model(&self, request: &CopyRequest) -> Result<()>;
+
+    #[cfg(feature = "model")]
+    async fn delete_model(&self, request: &DeleteRequest) -> Result<()>;
+}
+```
+
+### Async Implementation
+
+```rust
+#[async_trait]
+impl OllamaApiAsync for OllamaClient {
+    async fn version(&self) -> Result<VersionResponse> {
+        let url = self.config.url(Endpoints::VERSION);
+        self.get_with_retry(&url).await
     }
 
-    /// Get the API version (blocking).
-    pub fn version_sync(&self) -> Result<VersionResponse> {
-        tokio::runtime::Runtime::new()
-            .expect("Failed to create runtime")
-            .block_on(self.version())
+    async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse> {
+        let url = self.config.url(Endpoints::CHAT);
+        self.post_with_retry(&url, request).await
+    }
+
+    #[cfg(feature = "model")]
+    async fn list_models(&self) -> Result<ListResponse> {
+        let url = self.config.url(Endpoints::TAGS);
+        self.get_with_retry(&url).await
+    }
+
+    #[cfg(feature = "model")]
+    async fn copy_model(&self, request: &CopyRequest) -> Result<()> {
+        let url = self.config.url(Endpoints::COPY);
+        self.post_empty_with_retry(&url, request).await
+    }
+
+    #[cfg(feature = "model")]
+    async fn delete_model(&self, request: &DeleteRequest) -> Result<()> {
+        let url = self.config.url(Endpoints::DELETE);
+        self.delete_empty_with_retry(&url, request).await
     }
 }
 ```
 
-### POST Endpoint
+### Sync Trait Definition (`_blocking` suffix)
+
 ```rust
-// src/http/endpoints/generate.rs
+// src/http/api_sync.rs
 
-impl Client {
-    /// Generate a completion.
-    pub async fn generate(&self, request: GenerateRequest) -> Result<GenerateResponse> {
-        let url = self.url("/api/generate");
+pub trait OllamaApiSync {
+    /// Get the Ollama server version (blocking)
+    fn version_blocking(&self) -> Result<VersionResponse>;
 
-        let response = self.http()
-            .post(&url)
-            .json(&request)
-            .send()
-            .await?;
+    /// Send a chat request (blocking)
+    fn chat_blocking(&self, request: &ChatRequest) -> Result<ChatResponse>;
 
-        self.handle_response(response).await
+    #[cfg(feature = "model")]
+    fn list_models_blocking(&self) -> Result<ListResponse>;
+
+    #[cfg(feature = "model")]
+    fn copy_model_blocking(&self, request: &CopyRequest) -> Result<()>;
+
+    #[cfg(feature = "model")]
+    fn delete_model_blocking(&self, request: &DeleteRequest) -> Result<()>;
+}
+```
+
+### Sync Implementation
+
+```rust
+impl OllamaApiSync for OllamaClient {
+    fn version_blocking(&self) -> Result<VersionResponse> {
+        let url = self.config.url(Endpoints::VERSION);
+        self.get_blocking_with_retry(&url)
     }
 
-    /// Generate a completion (blocking).
-    pub fn generate_sync(&self, request: GenerateRequest) -> Result<GenerateResponse> {
-        tokio::runtime::Runtime::new()
-            .expect("Failed to create runtime")
-            .block_on(self.generate(request))
+    fn chat_blocking(&self, request: &ChatRequest) -> Result<ChatResponse> {
+        let url = self.config.url(Endpoints::CHAT);
+        self.post_blocking_with_retry(&url, request)
+    }
+
+    #[cfg(feature = "model")]
+    fn list_models_blocking(&self) -> Result<ListResponse> {
+        let url = self.config.url(Endpoints::TAGS);
+        self.get_blocking_with_retry(&url)
+    }
+
+    #[cfg(feature = "model")]
+    fn copy_model_blocking(&self, request: &CopyRequest) -> Result<()> {
+        let url = self.config.url(Endpoints::COPY);
+        self.post_empty_blocking_with_retry(&url, request)
+    }
+
+    #[cfg(feature = "model")]
+    fn delete_model_blocking(&self, request: &DeleteRequest) -> Result<()> {
+        let url = self.config.url(Endpoints::DELETE);
+        self.delete_empty_blocking_with_retry(&url, request)
     }
 }
 ```
 
-### Streaming Endpoint
+## Generic Retry Helpers
+
+All HTTP operations use generic retry helpers defined in `client.rs`:
+
+| Helper | HTTP Method | Response | Use Case |
+|--------|-----------|----------|----------|
+| `get_with_retry<T>` | GET | Deserialized `T` | version, tags, ps |
+| `post_with_retry<R, T>` | POST | Deserialized `T` | chat, generate, embed, show |
+| `post_empty_with_retry<R>` | POST | `()` | copy |
+| `delete_empty_with_retry<R>` | DELETE | `()` | delete |
+
+### Retry Logic Pattern
+
 ```rust
-// src/http/endpoints/generate.rs
+pub(super) async fn post_with_retry<R, T>(&self, url: &str, body: &R) -> Result<T>
+where
+    R: serde::Serialize,
+    T: serde::de::DeserializeOwned,
+{
+    for attempt in 0..=self.config.max_retries {
+        match self.client.post(url).json(body).send().await {
+            Ok(response) => {
+                if response.status().is_server_error() && attempt < self.config.max_retries {
+                    tokio::time::sleep(Duration::from_millis(100 * (attempt as u64 + 1))).await;
+                    continue;
+                }
+                if response.status().is_success() {
+                    return response.json().await.map_err(Into::into);
+                }
+                return Err(Error::HttpStatusError(response.status().as_u16()));
+            }
+            Err(_e) => {
+                if attempt < self.config.max_retries {
+                    tokio::time::sleep(Duration::from_millis(100 * (attempt as u64 + 1))).await;
+                }
+            }
+        }
+    }
+    Err(Error::MaxRetriesExceededError(self.config.max_retries))
+}
+```
 
-use futures_util::Stream;
-use tokio_stream::StreamExt;
+## Endpoint Constant Usage
 
-impl Client {
-    /// Generate a completion with streaming.
-    pub async fn generate_stream(
+All methods reference endpoints via `Endpoints` constants:
+
+```rust
+// NOT this:
+let url = format!("{}/api/chat", self.config.base_url);
+
+// THIS:
+let url = self.config.url(Endpoints::CHAT);
+```
+
+## Streaming Endpoints (Future)
+
+```rust
+// src/http/api_async.rs
+
+#[async_trait]
+pub trait OllamaApiAsync {
+    // ... non-streaming methods ...
+
+    /// Generate with streaming
+    async fn generate_stream(
         &self,
-        request: GenerateRequest,
-    ) -> Result<impl Stream<Item = Result<GenerateChunk>>> {
-        let mut request = request;
-        request.stream = Some(true);
-
-        let url = self.url("/api/generate");
-
-        let response = self.http()
-            .post(&url)
-            .json(&request)
-            .send()
-            .await?;
-
-        if !response.status().is_success() {
-            return Err(self.extract_error(response).await);
-        }
-
-        let stream = response
-            .bytes_stream()
-            .map(|result| {
-                result
-                    .map_err(LibraryError::from)
-                    .and_then(|bytes| {
-                        serde_json::from_slice(&bytes)
-                            .map_err(LibraryError::from)
-                    })
-            });
-
-        Ok(stream)
-    }
-}
-```
-
-## Error Handling
-
-### Response Handler
-```rust
-// src/http/client.rs
-
-impl Client {
-    async fn handle_response<T: DeserializeOwned>(&self, response: reqwest::Response) -> Result<T> {
-        let status = response.status();
-
-        if status.is_success() {
-            response.json().await.map_err(Into::into)
-        } else {
-            let error = self.extract_error(response).await;
-            Err(error)
-        }
-    }
-
-    async fn extract_error(&self, response: reqwest::Response) -> LibraryError {
-        let status = response.status().as_u16();
-
-        match response.json::<ErrorResponse>().await {
-            Ok(err) => LibraryError::Api {
-                status,
-                message: err.error,
-            },
-            Err(_) => LibraryError::Api {
-                status,
-                message: format!("HTTP {}", status),
-            },
-        }
-    }
-}
-
-#[derive(Debug, Deserialize)]
-struct ErrorResponse {
-    error: String,
-}
-```
-
-### Specific Error Types
-```rust
-impl Client {
-    pub async fn get_model(&self, name: &str) -> Result<Model> {
-        let response = self.http()
-            .get(&self.url(&format!("/api/models/{}", name)))
-            .send()
-            .await?;
-
-        match response.status().as_u16() {
-            200 => Ok(response.json().await?),
-            404 => Err(LibraryError::ModelNotFound(name.to_string())),
-            status => Err(LibraryError::Api {
-                status,
-                message: self.extract_error_message(response).await,
-            }),
-        }
-    }
+        request: &GenerateRequest,
+    ) -> Result<impl Stream<Item = Result<GenerateResponse>>>;
 }
 ```
 
@@ -188,163 +238,223 @@ impl Client {
 
 ```
 src/http/
-├── mod.rs           # Module exports
-├── client.rs        # Client struct and core methods
-└── endpoints/
-    ├── mod.rs       # Endpoint module exports
-    ├── version.rs   # Version endpoint
-    ├── generate.rs  # Generate endpoint
-    ├── chat.rs      # Chat endpoint
-    └── models.rs    # Model management endpoints
+├── mod.rs           # Re-exports: ClientConfig, OllamaClient, traits
+├── config.rs        # ClientConfig + impl Default
+├── client.rs        # OllamaClient + constructors + retry helpers
+├── endpoints.rs     # Endpoint constants
+├── api_async.rs     # OllamaApiAsync trait + impl for OllamaClient
+└── api_sync.rs      # OllamaApiSync trait + impl for OllamaClient
 ```
 
-### Endpoint Module Pattern
-```rust
-// src/http/endpoints/mod.rs
-
-mod version;
-mod generate;
-mod chat;
-mod models;
-
-// Methods are implemented directly on Client
-// No additional exports needed
-```
+**Key:** Methods are defined in the trait, not as direct `impl Client` blocks. All API surface is through the traits.
 
 ## Tasks Checklist
 
 ### Per Endpoint
-- [ ] Write implementation plan
-- [ ] Implement async method
-- [ ] Implement sync method
-- [ ] Add error handling
-- [ ] Write unit tests
-- [ ] Write integration test (optional)
-- [ ] Create example
+- [ ] Write implementation plan (in `impl/`)
+- [ ] Add endpoint constant to `Endpoints`
+- [ ] Add async trait method to `OllamaApiAsync`
+- [ ] Add async implementation using retry helper
+- [ ] Add sync trait method to `OllamaApiSync` (`_blocking` suffix)
+- [ ] Add sync implementation using blocking retry helper
+- [ ] Feature-gate if model/tools endpoint
 
-### Streaming Endpoints
-- [ ] Implement stream method
-- [ ] Handle partial JSON parsing
-- [ ] Add stream consumption helpers
-- [ ] Test stream behavior
+### Integration Tests (`tests/client_{operation}_tests.rs`)
+- [ ] Async success test with mockito
+- [ ] Async error test (404, etc.)
+- [ ] Async retry on server error (mock_fail + mock_success with expect(1))
+- [ ] Async max retries exceeded (expect(N+1))
+- [ ] Sync success test
+- [ ] Sync error test
+- [ ] Sync retry test
+- [ ] Sync max retries exceeded test
+- [ ] Section separators between test groups
+
+### Examples (`examples/{feature}_{mode}.rs`)
+- [ ] Async example
+- [ ] Sync example
+- [ ] Cargo.toml `[[example]]` with `required-features` if needed
+- [ ] Cargo.toml `[[test]]` with `required-features` if needed
 
 ### Quality
-- [ ] All endpoints implemented
-- [ ] Error handling consistent
-- [ ] Tests pass
-- [ ] Examples compile and run
+- [ ] All endpoints implemented with both async and sync
+- [ ] Retry logic consistent across all helpers
+- [ ] `cargo build --all-features` succeeds
+- [ ] `cargo test --all-features` passes
+- [ ] `cargo clippy --all-features` passes
+- [ ] `cargo fmt` applied
+- [ ] Doc examples with `no_run`
 
 ## Testing Strategy
 
-### Unit Tests
+### Integration Tests with Mockito
+
+**File:** `tests/client_{operation}_tests.rs`
+
 ```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use mockito::{mock, server_url};
+//! Tests for operation API methods (METHOD /api/endpoint)
 
-    #[tokio::test]
-    async fn test_generate_success() {
-        let _m = mock("POST", "/api/generate")
-            .with_status(200)
-            .with_header("content-type", "application/json")
-            .with_body(r#"{"response": "Hello", "done": true}"#)
-            .create();
+use ollama_oxide::{ClientConfig, EndpointRequest, OllamaApiAsync, OllamaApiSync, OllamaClient};
+use std::time::Duration;
 
-        let client = Client::with_base_url(&server_url());
-        let request = GenerateRequest::new("model", "Hi");
-
-        let response = client.generate(request).await.unwrap();
-        assert_eq!(response.response, "Hello");
-    }
-
-    #[tokio::test]
-    async fn test_generate_error() {
-        let _m = mock("POST", "/api/generate")
-            .with_status(400)
-            .with_body(r#"{"error": "Invalid model"}"#)
-            .create();
-
-        let client = Client::with_base_url(&server_url());
-        let request = GenerateRequest::new("model", "Hi");
-
-        let result = client.generate(request).await;
-        assert!(matches!(result, Err(LibraryError::Api { status: 400, .. })));
-    }
-}
-```
-
-### Integration Tests
-```rust
-// tests/integration/api_tests.rs
+// ============================================================================
+// Async API Tests
+// ============================================================================
 
 #[tokio::test]
-#[ignore] // Requires running service
-async fn test_real_generate() {
-    let client = Client::new();
-    let request = GenerateRequest::new("llama3", "Say hello");
+async fn test_operation_async_success() {
+    let mut server = mockito::Server::new_async().await;
 
-    let response = client.generate(request).await;
-    assert!(response.is_ok());
+    let mock = server
+        .mock("POST", "/api/endpoint")
+        .match_body(mockito::Matcher::Json(serde_json::json!({
+            "model": "llama3"
+        })))
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(r#"{"model":"llama3","response":"Hello","done":true}"#)
+        .create_async()
+        .await;
+
+    let config = ClientConfig {
+        base_url: server.url(),
+        timeout: Duration::from_secs(5),
+        max_retries: 0,
+    };
+
+    let client = OllamaClient::new(config).unwrap();
+    let request = EndpointRequest::new("llama3", "prompt");
+    let result = client.operation(&request).await;
+
+    assert!(result.is_ok());
+    mock.assert_async().await;
+}
+
+// ============================================================================
+// Sync API Tests
+// ============================================================================
+
+#[test]
+fn test_operation_sync_success() {
+    let mut server = mockito::Server::new();
+
+    let mock = server
+        .mock("POST", "/api/endpoint")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(r#"{"model":"llama3","response":"Hello","done":true}"#)
+        .create();
+
+    let config = ClientConfig {
+        base_url: server.url(),
+        timeout: Duration::from_secs(5),
+        max_retries: 0,
+    };
+
+    let client = OllamaClient::new(config).unwrap();
+    let request = EndpointRequest::new("llama3", "prompt");
+    let result = client.operation_blocking(&request);
+
+    assert!(result.is_ok());
+    mock.assert();
+}
+
+// ============================================================================
+// Error Handling Tests
+// ============================================================================
+
+#[tokio::test]
+async fn test_operation_async_retry_on_server_error() {
+    let mut server = mockito::Server::new_async().await;
+
+    let mock_fail = server
+        .mock("POST", "/api/endpoint")
+        .with_status(500)
+        .expect(1)
+        .create_async()
+        .await;
+
+    let mock_success = server
+        .mock("POST", "/api/endpoint")
+        .with_status(200)
+        .with_body(r#"{"done":true}"#)
+        .expect(1)
+        .create_async()
+        .await;
+
+    let config = ClientConfig {
+        base_url: server.url(),
+        timeout: Duration::from_secs(5),
+        max_retries: 1,
+    };
+
+    let client = OllamaClient::new(config).unwrap();
+    let result = client.operation(&request).await;
+
+    assert!(result.is_ok());
+    mock_fail.assert_async().await;
+    mock_success.assert_async().await;
 }
 ```
 
 ## Examples
 
-### Basic Example
+### Async Example
 ```rust
-// examples/generate_basic_async.rs
+//! Example: Chat completion (async)
+//!
+//! Run with: cargo run --example chat_async
 
-use library::{Client, GenerateRequest};
+use ollama_oxide::{ChatMessage, ChatRequest, OllamaApiAsync, OllamaClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
+    let client = OllamaClient::default()?;
 
-    let request = GenerateRequest::new("llama3", "Hello, world!");
-    let response = client.generate(request).await?;
+    let request = ChatRequest::new(
+        "qwen3:0.6b",
+        [ChatMessage::user("Hello!")],
+    );
 
-    println!("{}", response.response);
+    let response = client.chat(&request).await?;
+    println!("{}", response.content().unwrap_or("No response"));
+
     Ok(())
 }
 ```
 
-### Streaming Example
+### Sync Example
 ```rust
-// examples/generate_streaming.rs
+//! Example: Chat completion (sync)
+//!
+//! Run with: cargo run --example chat_sync
 
-use library::{Client, GenerateRequest};
-use tokio_stream::StreamExt;
+use ollama_oxide::{ChatMessage, ChatRequest, OllamaApiSync, OllamaClient};
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = OllamaClient::default()?;
 
-    let request = GenerateRequest::builder()
-        .model("llama3")
-        .prompt("Tell me a story")
-        .build()?;
+    let request = ChatRequest::new(
+        "qwen3:0.6b",
+        [ChatMessage::user("Hello!")],
+    );
 
-    let mut stream = client.generate_stream(request).await?;
+    let response = client.chat_blocking(&request)?;
+    println!("{}", response.content().unwrap_or("No response"));
 
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk?;
-        print!("{}", chunk.response);
-    }
-
-    println!();
     Ok(())
 }
 ```
 
 ## Completion Criteria
 
-1. All endpoints have async implementation
-2. All endpoints have sync implementation
-3. Streaming endpoints work correctly
-4. Error handling is consistent
-5. All tests pass
-6. Examples compile and run
+1. All endpoints have `OllamaApiAsync` trait methods + implementation
+2. All endpoints have `OllamaApiSync` trait methods + implementation (`_blocking` suffix)
+3. All methods use generic retry helpers and `Endpoints` constants
+4. Feature-gated methods for model/tools operations
+5. Integration tests pass with mockito (async, sync, retry, max retries)
+6. Examples compile and demonstrate real usage
+7. `cargo test --all-features` passes
 
 ## Next Phase
 

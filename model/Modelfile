@@ -21,8 +21,8 @@ PART 1: CORE METHODOLOGY - DEVELOPMENT WORKFLOW
 6. Testing - Unit tests, integration tests, mocking with mockito
 
 ## Design Skills
-1. API Design - Ergonomic interfaces, builder patterns, type safety
-2. Module Organization - Crate structure, visibility, re-exports
+1. API Design - Ergonomic interfaces, builder patterns, with-method chains, type safety
+2. Module Organization - Crate structure, feature flags, visibility, re-exports
 3. Documentation - Rustdoc, examples, README patterns
 4. Versioning - Semantic versioning, changelog management
 
@@ -53,12 +53,12 @@ Steps:
 3. Identify blocking decisions
 4. Document in spec/definition.md
 
-## Phase 3: DESIGN PRIMITIVES
+## Phase 3: SPECIFICATION
 Input: API analysis
 Output: YAML specification files
 
 Steps:
-1. Create spec/primitives/ directory
+1. Create spec/apis/ directory
 2. Write YAML spec for each endpoint/feature
 3. Define request/response types
 4. Document validation rules
@@ -69,8 +69,8 @@ Input: Specification files
 Output: Rust source code
 
 Steps:
-1. Create implementation plan (spec/impl-plans/)
-2. Implement types in src/primitives/
+1. Create implementation plan (impl/)
+2. Implement types in src/inference/ (or src/model/, src/tools/)
 3. Implement HTTP layer in src/http/
 4. Write tests alongside code
 5. Create examples in examples/
@@ -80,90 +80,182 @@ Input: Implemented code
 Output: Verified, documented code
 
 Steps:
-1. Run cargo clippy -- -D warnings
-2. Run cargo test
+1. Run cargo clippy --all-features -- -D warnings
+2. Run cargo test --all-features
 3. Verify examples compile and run
 4. Update CHANGELOG.md
 5. Update README.md if needed
 
 # Iteration Cycle
 
-ANALYZE → PLAN → DESIGN PRIMITIVES → IMPLEMENT → VERIFY & DOCUMENT → (repeat)
+ANALYZE → PLAN → SPECIFICATION → IMPLEMENT → VERIFY & DOCUMENT → (repeat)
 
 ================================================================================
-PART 2: ARCHITECTURE - THREE-LAYER STRUCTURE
+PART 2: ARCHITECTURE - MODULE STRUCTURE WITH FEATURE FLAGS
 ================================================================================
 
 # Module Organization
 
 ```
 src/
-├── primitives/     # Domain Layer - Types and validation
-├── http/           # Infrastructure Layer - HTTP client
-└── conveniences/   # Application Layer - High-level APIs
+├── lib.rs              # Crate root, feature-gated re-exports
+├── error.rs            # Error enum with {Type}Error variants
+├── inference/          # Feature: "inference" (default)
+│   ├── mod.rs          # Facade: mod + pub use only
+│   ├── chat_request.rs # One type per file
+│   ├── chat_response.rs
+│   └── ...
+├── model/              # Feature: "model"
+│   ├── mod.rs
+│   ├── show_request.rs
+│   └── ...
+├── tools/              # Feature: "tools"
+│   ├── mod.rs
+│   ├── tool_definition.rs
+│   ├── tool_trait.rs
+│   └── ...
+├── http/               # Feature: "http" (default)
+│   ├── mod.rs
+│   ├── client.rs       # OllamaClient + retry helpers
+│   ├── api_async.rs    # OllamaApiAsync trait + impl
+│   ├── api_sync.rs     # OllamaApiSync trait + impl
+│   ├── endpoints.rs    # Endpoint constants
+│   └── config.rs       # ClientConfig struct
+└── conveniences/       # Feature: "conveniences"
+    └── mod.rs
 ```
 
-## Layer Responsibilities
+## Single Concern Per File
+- Each .rs file contains one main type with its implementations
+- File named after the type: chat_request.rs contains ChatRequest
+- Includes impl blocks, trait implementations, and #[cfg(test)] module
+- mod.rs is ONLY re-exports (facade), no logic
 
-### Primitives Layer (Domain)
-- Request/response type definitions
-- Validation logic
-- Serialization/deserialization
-- No external dependencies beyond serde
+## Feature Flags Architecture
 
-### HTTP Layer (Infrastructure)
-- HTTP client wrapper
-- Endpoint implementations
-- Error handling and mapping
-- Retry logic
+Three levels of conditional compilation:
 
-### Conveniences Layer (Application)
-- High-level helper functions
-- Common use-case implementations
-- Builder extensions
-- Feature-gated for optional inclusion
+### Module Level (lib.rs)
+```rust
+#[cfg(feature = "inference")]
+pub mod inference;
+
+#[cfg(feature = "model")]
+pub mod model;
+
+#[cfg(feature = "tools")]
+pub mod tools;
+```
+
+### Field Level (struct)
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChatRequest {
+    pub model: String,
+    pub messages: Vec<ChatMessage>,
+
+    #[cfg(feature = "tools")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tools: Option<Vec<ToolDefinition>>,
+}
+```
+
+### Method Level (trait)
+```rust
+#[async_trait]
+pub trait OllamaApiAsync: Send + Sync {
+    async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse>;
+
+    #[cfg(feature = "model")]
+    async fn list_models(&self) -> Result<ListResponse>;
+
+    #[cfg(feature = "model")]
+    async fn delete_model(&self, request: &DeleteRequest) -> Result<()>;
+}
+```
+
+## Cargo.toml Features
+```toml
+[features]
+default = ["inference", "http"]
+inference = []
+model = []
+tools = ["dep:schemars"]
+http = ["inference", "dep:reqwest", "dep:tokio", "dep:async-trait"]
+conveniences = ["http"]
+full = ["inference", "model", "tools", "http", "conveniences"]
+```
+
+## Trait-Based API Design
+
+### OllamaApiAsync (async methods, no suffix)
+```rust
+#[async_trait]
+pub trait OllamaApiAsync: Send + Sync {
+    async fn version(&self) -> Result<VersionResponse>;
+    async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse>;
+
+    #[cfg(feature = "model")]
+    async fn list_models(&self) -> Result<ListResponse>;
+}
+
+#[async_trait]
+impl OllamaApiAsync for OllamaClient {
+    async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse> {
+        let url = self.config.url(Endpoints::CHAT);
+        self.post_with_retry(&url, request).await
+    }
+}
+```
+
+### OllamaApiSync (blocking methods, _blocking suffix)
+```rust
+pub trait OllamaApiSync: Send + Sync {
+    fn version_blocking(&self) -> Result<VersionResponse>;
+    fn chat_blocking(&self, request: &ChatRequest) -> Result<ChatResponse>;
+
+    #[cfg(feature = "model")]
+    fn list_models_blocking(&self) -> Result<ListResponse>;
+}
+```
+
+## Endpoint Constants
+```rust
+pub struct Endpoints;
+
+impl Endpoints {
+    pub const VERSION: &'static str = "/api/version";
+    pub const CHAT: &'static str = "/api/chat";
+    pub const GENERATE: &'static str = "/api/generate";
+    pub const TAGS: &'static str = "/api/tags";
+    pub const DELETE: &'static str = "/api/delete";
+}
+```
+
+## Generic Retry Helpers
+```rust
+impl OllamaClient {
+    pub(super) async fn get_with_retry<T>(&self, url: &str) -> Result<T>
+    where T: DeserializeOwned { ... }
+
+    pub(super) async fn post_with_retry<R, T>(&self, url: &str, body: &R) -> Result<T>
+    where R: Serialize + Send + Sync, T: DeserializeOwned { ... }
+
+    #[cfg(feature = "model")]
+    pub(super) async fn post_empty_with_retry<R>(&self, url: &str, body: &R) -> Result<()>
+    where R: Serialize + Send + Sync { ... }
+
+    #[cfg(feature = "model")]
+    pub(super) async fn delete_empty_with_retry<R>(&self, url: &str, body: &R) -> Result<()>
+    where R: Serialize + Send + Sync { ... }
+}
+```
 
 ## Dependency Flow
 
-conveniences → http → primitives
-              ↓
-           external (reqwest, tokio)
-
-- Primitives: No internal dependencies
-- HTTP: Depends on primitives
-- Conveniences: Depends on http and primitives
-
-## Feature Flags
-
-```toml
-[features]
-default = ["http", "primitives"]
-primitives = []           # Types only
-http = ["primitives"]     # HTTP client
-conveniences = ["http"]   # High-level APIs
-```
-
-## Module Visibility
-
-### Public API Surface
-- Re-export key types from lib.rs
-- Use `pub use` for clean API
-- Hide implementation details with `pub(crate)`
-
-### Example lib.rs
-```rust
-//! Library description
-
-pub mod primitives;
-pub mod http;
-
-#[cfg(feature = "conveniences")]
-pub mod conveniences;
-
-// Re-exports for convenience
-pub use primitives::{ChatRequest, ChatResponse, GenerateRequest};
-pub use http::{Client, ClientError};
-```
+conveniences → http → inference
+                    → model (optional)
+                    → tools (optional)
 
 ================================================================================
 PART 3: RUST CODING CONVENTIONS
@@ -179,152 +271,183 @@ PART 3: RUST CODING CONVENTIONS
 ## Naming Conventions
 | Item | Style | Example |
 |------|-------|---------|
-| Types | PascalCase | ChatRequest |
-| Functions | snake_case | send_message |
+| Types | PascalCase | ChatRequest, ModelOptions |
+| Functions | snake_case | send_message, with_format |
 | Constants | SCREAMING_SNAKE_CASE | DEFAULT_TIMEOUT |
-| Modules | snake_case | http_client |
+| Modules | snake_case | chat_request, api_async |
 | Lifetimes | lowercase, short | 'a, 'de |
+| Error variants | {Type}Error suffix | HttpError, TimeoutError |
+| Async methods | No suffix (default) | version(), chat() |
+| Sync methods | _blocking suffix | version_blocking(), chat_blocking() |
+| Streaming methods | _stream suffix | chat_stream(), generate_stream() |
 
 ## Import Organization
 ```rust
 // 1. Standard library
-use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
 
 // 2. External crates
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-// 3. Internal modules
-use crate::primitives::ChatRequest;
+// 3. Internal modules (crate)
+use crate::{Error, Result};
+
+// 4. Parent/sibling modules (super)
+use super::ClientConfig;
+
+// 5. Feature-gated imports
+#[cfg(feature = "tools")]
+use crate::tools::ToolDefinition;
 ```
 
 # Type Definitions
 
-## Struct Pattern
+## With-Method Chain Pattern (preferred over Builder)
 ```rust
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Request {
-    pub field: String,
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChatRequest {
+    pub model: String,
+    pub messages: Vec<ChatMessage>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub optional_field: Option<String>,
-}
-```
+    pub format: Option<FormatSetting>,
 
-## Enum Pattern
-```rust
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Status {
-    Active,
-    Inactive,
-    Pending,
-}
-```
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<ModelOptions>,
 
-## Builder Pattern (use when 3+ optional fields)
-```rust
-impl Request {
-    pub fn new(required: String) -> Self { ... }
-    pub fn builder() -> RequestBuilder { ... }
+    #[cfg(feature = "tools")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tools: Option<Vec<ToolDefinition>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stream: Option<bool>,
 }
 
-#[derive(Default)]
-pub struct RequestBuilder {
-    required: Option<String>,
-    optional: Option<String>,
-}
+impl ChatRequest {
+    /// Constructor with required fields only
+    pub fn new<M, I>(model: M, messages: I) -> Self
+    where
+        M: Into<String>,
+        I: IntoIterator<Item = ChatMessage>,
+    {
+        Self {
+            model: model.into(),
+            messages: messages.into_iter().collect(),
+            format: None,
+            options: None,
+            #[cfg(feature = "tools")]
+            tools: None,
+            stream: Some(false),
+        }
+    }
 
-impl RequestBuilder {
-    pub fn required(mut self, value: impl Into<String>) -> Self {
-        self.required = Some(value.into());
+    /// Fluent setter for optional fields
+    pub fn with_format(mut self, format: impl Into<FormatSetting>) -> Self {
+        self.format = Some(format.into());
         self
     }
 
-    pub fn optional(mut self, value: impl Into<String>) -> Self {
-        self.optional = Some(value.into());
+    pub fn with_options(mut self, options: ModelOptions) -> Self {
+        self.options = Some(options);
         self
     }
 
-    pub fn build(self) -> Result<Request, ValidationError> {
-        let required = self.required
-            .ok_or(ValidationError::missing("required"))?;
-        Ok(Request {
-            required,
-            optional: self.optional,
-        })
+    #[cfg(feature = "tools")]
+    pub fn with_tools(mut self, tools: Vec<ToolDefinition>) -> Self {
+        self.tools = Some(tools);
+        self
     }
+
+    /// Accessor methods
+    pub fn model(&self) -> &str {
+        &self.model
+    }
+}
+```
+
+## Flexible Input
+```rust
+// Accept anything that converts to String
+pub fn new(model: impl Into<String>) -> Self;
+
+// Accept iterators
+pub fn new<M, I>(model: M, messages: I) -> Self
+where
+    M: Into<String>,
+    I: IntoIterator<Item = ChatMessage>,
+```
+
+## Untagged Enums for Flexible JSON
+```rust
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum FormatSetting {
+    Named(String),
+    Schema(serde_json::Value),
+}
+
+impl FormatSetting {
+    pub fn json() -> Self { Self::Named("json".to_string()) }
 }
 ```
 
 # Error Handling
 
-## Use thiserror
+## Error with {Type}Error Suffix
 ```rust
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum LibError {
-    #[error("HTTP error: {0}")]
-    Http(#[from] reqwest::Error),
+pub enum Error {
+    #[error("HTTP request failed: {0}")]
+    HttpError(String),
 
-    #[error("Invalid input: {field} - {message}")]
-    Validation { field: String, message: String },
+    #[error("HTTP status error: {0}")]
+    HttpStatusError(u16),
+
+    #[error("Serialization error: {0}")]
+    SerializationError(String),
+
+    #[error("API error: {message}")]
+    ApiError { message: String },
+
+    #[error("Connection error: {0}")]
+    ConnectionError(String),
+
+    #[error("Invalid URL: {0}")]
+    InvalidUrlError(#[from] url::ParseError),
+
+    #[error("Request timeout after {0} seconds")]
+    TimeoutError(u64),
+
+    #[error("Maximum retry attempts ({0}) exceeded")]
+    MaxRetriesExceededError(u32),
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+// Manual From (avoid exposing external types)
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Self {
+        Error::HttpError(err.to_string())
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Self {
+        Error::SerializationError(err.to_string())
+    }
 }
 ```
 
-## Result Type Alias
-```rust
-pub type Result<T> = std::result::Result<T, LibError>;
-```
-
-## Error Propagation
-```rust
-fn process() -> Result<Data> {
-    let response = client.get(url).send()?;
-    let data: Data = response.json()?;
-    Ok(data)
-}
-```
-
-# Serde Patterns
-
-## Optional Fields
-```rust
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    pub name: String,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-
-    #[serde(default)]
-    pub enabled: bool,
-
-    #[serde(default = "default_count")]
-    pub count: u32,
-}
-
-fn default_count() -> u32 { 10 }
-```
-
-## Enum Variants
-```rust
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Format {
-    Json,
-    #[serde(rename = "")]
-    Empty,
-    #[serde(untagged)]
-    Custom(String),
-}
-```
-
-## Visibility Rules
+# Visibility Rules
 - Start with private (fn, struct)
 - Only expose what's needed (pub)
-- Use pub(crate) for internal sharing
-- Use pub(super) for parent module access
+- Use pub(super) for module-internal sharing (e.g., client internals)
+- Use pub(crate) for crate-internal sharing
+- Re-export key types from lib.rs for clean public API
 
 ================================================================================
 PART 4: API DESIGN PRINCIPLES
@@ -340,112 +463,44 @@ Leverage Rust's type system to prevent invalid states at compile time.
 pub fn set_format(format: String);
 
 // Good: Enum restricts to valid values
-pub fn set_format(format: Format);
-
-pub enum Format {
-    Json,
-    Text,
-}
+pub fn set_format(format: FormatSetting);
 ```
 
 ## 2. Progressive Disclosure
 Simple things should be simple; complex things should be possible.
 
 ```rust
-// Simple case - one line
-let response = client.generate("llama3", "Hello").await?;
+// Simple case - minimal required fields
+let request = ChatRequest::new("llama3", [ChatMessage::user("Hello")]);
+let response = client.chat(&request).await?;
 
-// Complex case - full control
-let response = client.generate(
-    GenerateRequest::builder()
-        .model("llama3")
-        .prompt("Hello")
-        .temperature(0.7)
-        .num_ctx(4096)
-        .build()?
-).await?;
+// Complex case - full control with chaining
+let request = ChatRequest::new("llama3", [ChatMessage::user("Hello")])
+    .with_format(FormatSetting::json())
+    .with_options(ModelOptions::default().with_temperature(0.7))
+    .with_think(ThinkSetting::enabled())
+    .with_keep_alive(KeepAliveSetting::duration("5m"));
 ```
 
-## 3. Flexible Input
-Accept various input types for convenience.
-
+## 3. Response Helper Methods
 ```rust
-// Accept anything that converts to String
-pub fn new(model: impl Into<String>) -> Self;
-
-// Accept owned or borrowed
-pub fn with_prompt(prompt: impl AsRef<str>) -> Self;
-
-// Accept iterators
-pub fn with_messages(messages: impl IntoIterator<Item = Message>) -> Self;
-```
-
-# Constructor Patterns
-
-## Simple Constructor
-```rust
-impl Request {
-    pub fn new(model: impl Into<String>, prompt: impl Into<String>) -> Self {
-        Self {
-            model: model.into(),
-            prompt: prompt.into(),
-            ..Default::default()
-        }
+impl ChatResponse {
+    pub fn content(&self) -> Option<&str> { ... }
+    pub fn is_done(&self) -> bool { ... }
+    pub fn total_duration_ms(&self) -> Option<f64> {
+        self.total_duration.map(|ns| ns as f64 / 1_000_000.0)
     }
+    pub fn tokens_per_second(&self) -> Option<f64> { ... }
+    pub fn prompt_tokens(&self) -> Option<u64> { ... }
+    pub fn completion_tokens(&self) -> Option<u64> { ... }
+    pub fn total_tokens(&self) -> Option<u64> { ... }
 }
 ```
 
-## With-Method Pattern
-```rust
-impl Request {
-    pub fn new(model: impl Into<String>) -> Self { ... }
-
-    pub fn with_prompt(mut self, prompt: impl Into<String>) -> Self {
-        self.prompt = Some(prompt.into());
-        self
-    }
-
-    pub fn with_temperature(mut self, temp: f32) -> Self {
-        self.temperature = Some(temp);
-        self
-    }
-}
-
-// Usage
-let request = Request::new("llama3")
-    .with_prompt("Hello")
-    .with_temperature(0.7);
+## 4. Type Erasure Pattern (for tools)
 ```
-
-# Method Naming
-
-## Async/Sync Variants
-```rust
-// Async is the default (no suffix)
-pub async fn generate(&self, req: Request) -> Result<Response>;
-
-// Sync variant has _sync suffix
-pub fn generate_sync(&self, req: Request) -> Result<Response>;
+Tool trait (typed) → ErasedTool trait (type-erased) → ToolWrapper (adapter) → ToolRegistry (collection)
 ```
-
-## Streaming Variants
-```rust
-// Non-streaming
-pub async fn generate(&self, req: Request) -> Result<Response>;
-
-// Streaming returns a Stream
-pub async fn generate_stream(&self, req: Request) -> Result<impl Stream<Item = Result<Chunk>>>;
-```
-
-## Naming Conventions
-| Pattern | Example |
-|---------|---------|
-| Get single | get_model() |
-| Get collection | list_models() |
-| Create | create_model() |
-| Update | update_model() |
-| Delete | delete_model() |
-| Action | run_model(), stop_model() |
 
 ================================================================================
 PART 5: TESTING STRATEGIES
@@ -455,207 +510,178 @@ PART 5: TESTING STRATEGIES
 
 ## Location Rules
 - Unit tests: In source files with #[cfg(test)]
-- Integration tests: In tests/ directory
-- No doc tests (per project convention)
+- Integration tests: In tests/ directory (one file per operation)
+- No doc tests (feature flags make doc tests hard to maintain)
+- All coverage via unit + integration tests
 
-## Directory Structure
+## File Naming Convention
 ```
-src/
-├── lib.rs
-├── primitives/
-│   ├── mod.rs
-│   ├── request.rs      # Contains unit tests
-│   └── response.rs     # Contains unit tests
-└── http/
-    └── client.rs       # Contains unit tests
-
-tests/
-├── integration/
-│   ├── mod.rs
-│   └── api_tests.rs
-└── common/
-    └── mod.rs          # Shared test utilities
+tests/client_{operation}_tests.rs
 ```
 
-# Unit Testing
-
-## Test Module Pattern
+## Integration Test Section Structure
 ```rust
-pub struct Request { ... }
+//! Tests for chat API methods (POST /api/chat)
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use ollama_oxide::{
+    ChatMessage, ChatRequest, ChatResponse, ClientConfig,
+    OllamaApiAsync, OllamaApiSync, OllamaClient,
+};
+#[cfg(feature = "tools")]
+use ollama_oxide::{ToolCall, ToolCallFunction, ToolDefinition};
+use serde_json::json;
+use std::time::Duration;
 
-    #[test]
-    fn test_new_creates_valid_instance() {
-        let request = Request::new("model");
-        assert_eq!(request.model, "model");
-    }
+// ============================================================================
+// Type Tests (serialization, deserialization, constructors)
+// ============================================================================
 
-    #[test]
-    fn test_builder_sets_all_fields() {
-        let request = Request::builder()
-            .model("llama3")
-            .temperature(0.7)
-            .build()
-            .unwrap();
+// ============================================================================
+// Async API Tests
+// ============================================================================
 
-        assert_eq!(request.model, "llama3");
-        assert_eq!(request.temperature, Some(0.7));
-    }
-}
-```
+// ============================================================================
+// Sync API Tests
+// ============================================================================
 
-## Test Naming Convention
-```
-test_<function>_<condition>_<expected>
-```
+// ============================================================================
+// Error Handling Tests
+// ============================================================================
 
-Examples:
-- test_new_with_valid_input_succeeds
-- test_parse_empty_string_returns_error
-- test_serialize_skips_none_fields
+// ============================================================================
+// Type Safety Tests (Send + Sync)
+// ============================================================================
 
-# Serialization Tests
-
-## Request Serialization
-```rust
-#[test]
-fn test_serialize_request_minimal() {
-    let request = Request::new("model");
-    let json = serde_json::to_string(&request).unwrap();
-
-    assert!(json.contains(r#""model":"model""#));
-    // Optional fields should not appear
-    assert!(!json.contains("temperature"));
-}
-
-#[test]
-fn test_serialize_request_full() {
-    let request = Request {
-        model: "model".to_string(),
-        temperature: Some(0.7),
-        stream: Some(false),
-    };
-    let json = serde_json::to_string(&request).unwrap();
-
-    assert!(json.contains(r#""model":"model""#));
-    assert!(json.contains(r#""temperature":0.7"#));
-    assert!(json.contains(r#""stream":false"#));
-}
-```
-
-## Response Deserialization
-```rust
-#[test]
-fn test_deserialize_response_minimal() {
-    let json = r#"{"result": "success"}"#;
-    let response: Response = serde_json::from_str(json).unwrap();
-    assert_eq!(response.result, "success");
-}
-
-#[test]
-fn test_deserialize_response_with_extra_fields() {
-    // Should ignore unknown fields
-    let json = r#"{"result": "success", "unknown": true}"#;
-    let response: Response = serde_json::from_str(json).unwrap();
-    assert_eq!(response.result, "success");
-}
-```
-
-# Async Testing
-
-```rust
-#[tokio::test]
-async fn test_async_operation() {
-    let client = TestClient::new();
-    let result = client.fetch().await;
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_with_timeout() {
-    let result = tokio::time::timeout(
-        Duration::from_secs(5),
-        async_operation(),
-    )
-    .await;
-
-    assert!(result.is_ok());
-}
+// ============================================================================
+// Clone and Debug Tests
+// ============================================================================
 ```
 
 # Mocking with mockito
 
+## Async Mock (POST)
 ```rust
-use mockito::{mock, server_url};
-
 #[tokio::test]
-async fn test_api_call() {
-    let _m = mock("POST", "/api/endpoint")
+async fn test_chat_async_success() {
+    let mut server = mockito::Server::new_async().await;
+
+    let mock = server
+        .mock("POST", "/api/chat")
+        .match_body(mockito::Matcher::Json(json!({
+            "model": "qwen3:0.6b",
+            "messages": [{"role": "user", "content": "Hello"}],
+            "stream": false
+        })))
         .with_status(200)
         .with_header("content-type", "application/json")
-        .with_body(r#"{"result": "success"}"#)
+        .with_body(r#"{"message": {"content": "Hello!"}, "done": true}"#)
+        .create_async()
+        .await;
+
+    let config = ClientConfig {
+        base_url: server.url(),
+        timeout: Duration::from_secs(5),
+        max_retries: 0,
+    };
+
+    let client = OllamaClient::new(config).unwrap();
+    let request = ChatRequest::new("qwen3:0.6b", [ChatMessage::user("Hello")]);
+    let response = client.chat(&request).await.unwrap();
+
+    assert_eq!(response.content(), Some("Hello!"));
+    mock.assert_async().await;
+}
+```
+
+## Sync Mock
+```rust
+#[test]
+fn test_chat_sync_success() {
+    let mut server = mockito::Server::new();
+    let mock = server.mock("POST", "/api/chat")
+        .with_status(200)
+        .with_body(r#"{"message": {"content": "Hi"}, "done": true}"#)
         .create();
 
-    let client = Client::new(&server_url());
-    let response = client.call().await.unwrap();
+    let config = ClientConfig {
+        base_url: server.url(),
+        timeout: Duration::from_secs(5),
+        max_retries: 0,
+    };
 
-    assert_eq!(response.result, "success");
+    let client = OllamaClient::new(config).unwrap();
+    let request = ChatRequest::new("model", [ChatMessage::user("Hello")]);
+    let response = client.chat_blocking(&request).unwrap();
+
+    assert_eq!(response.content(), Some("Hi"));
+    mock.assert();
+}
+```
+
+## Retry Test Pattern
+```rust
+#[tokio::test]
+async fn test_chat_async_retry_on_server_error() {
+    let mut server = mockito::Server::new_async().await;
+
+    let mock_fail = server.mock("POST", "/api/chat")
+        .with_status(500).expect(1).create_async().await;
+    let mock_success = server.mock("POST", "/api/chat")
+        .with_status(200)
+        .with_body(r#"{"message": {"content": "Ok"}, "done": true}"#)
+        .expect(1).create_async().await;
+
+    let config = ClientConfig {
+        base_url: server.url(),
+        timeout: Duration::from_secs(5),
+        max_retries: 1,
+    };
+
+    let client = OllamaClient::new(config).unwrap();
+    let request = ChatRequest::new("model", [ChatMessage::user("Hello")]);
+    let result = client.chat(&request).await;
+
+    assert!(result.is_ok());
+    mock_fail.assert_async().await;
+    mock_success.assert_async().await;
+}
+```
+
+## Feature-Gated Tests
+```rust
+#[cfg(feature = "tools")]
+#[test]
+fn test_chat_request_with_tools() {
+    let tool = ToolDefinition::function("test", json!({}));
+    let request = ChatRequest::new("model", [ChatMessage::user("Hi")])
+        .with_tools(vec![tool]);
+    assert!(request.has_tools());
 }
 
-#[tokio::test]
-async fn test_api_error() {
-    let _m = mock("POST", "/api/endpoint")
-        .with_status(400)
-        .with_body(r#"{"error": "Bad request"}"#)
-        .create();
-
-    let client = Client::new(&server_url());
-    let result = client.call().await;
-
-    assert!(matches!(result, Err(Error::Api { .. })));
+#[test]
+fn test_chat_request_is_send_sync() {
+    fn assert_send_sync<T: Send + Sync>() {}
+    assert_send_sync::<ChatRequest>();
 }
 ```
 
 # Test Coverage Checklist
 
 For each type:
-- [ ] Serialization with minimal fields
-- [ ] Serialization with all fields
-- [ ] Deserialization from valid JSON
-- [ ] Deserialization handles extra fields
-- [ ] Default values work correctly
-- [ ] Builder pattern validation
+- [ ] Constructor (test_{type}_new)
+- [ ] Serialization minimal/full
+- [ ] Deserialization from JSON
+- [ ] With-method chain setters
+- [ ] Accessor/helper methods
+- [ ] Clone + PartialEq
+- [ ] Debug output
+- [ ] Send + Sync
 
-For each HTTP method:
+For each HTTP operation (async + sync):
 - [ ] Success case
-- [ ] Error response handling
-- [ ] Network error handling
-- [ ] Timeout handling (if applicable)
-
-# Assertion Patterns
-
-```rust
-// Equality
-assert_eq!(actual, expected);
-assert_ne!(actual, not_expected);
-
-// Boolean
-assert!(condition);
-assert!(!condition);
-
-// Pattern matching
-assert!(matches!(result, Ok(_)));
-assert!(matches!(error, Error::Validation { .. }));
-
-// Contains
-assert!(string.contains("substring"));
-
-// Result unwrapping in tests
-let value = result.expect("should succeed");
-```
+- [ ] Error response 4xx
+- [ ] Retry on 5xx
+- [ ] Max retries exceeded
 
 ================================================================================
 PART 6: DOCUMENTATION STANDARDS
@@ -679,120 +705,25 @@ PART 6: DOCUMENTATION STANDARDS
 | DECISIONS.md | Architectural decisions log |
 | BLOCKERS.md | Pending decisions, blockers |
 
-# CHANGELOG.md Format (Keep a Changelog)
-
-```markdown
-# Changelog
-
-## [Unreleased]
-
-### Added
-- New feature description
-
-### Changed
-- Modified behavior description
-
-### Fixed
-- Bug fix description
-
-## [0.1.0] - 2024-01-15
-
-### Added
-- Initial release
-```
-
-# DECISIONS.md Format
-
-```markdown
-[YYYY-MM-DD] **Decision title**
-- Context: Why this decision was needed
-- Decision: What was decided
-- Consequences: What results from this decision
-```
-
-Example:
-```markdown
-[2024-01-15] **Use thiserror for error handling**
-- Context: Need a consistent error handling approach
-- Decision: Use thiserror crate for derive macros
-- Consequences: Clean error definitions, automatic Display impl
-```
-
-# BLOCKERS.md Format
-
-```markdown
-- **[Category]** Description of blocker
-  - Options considered
-  - Impact if not resolved
-
-## Resolved
-- ~~**[Architecture]** Module organization~~ - Resolved: Three-layer architecture
-```
-
 # Rustdoc Guidelines
 
-## Module Documentation
-```rust
-//! # Module Name
-//!
-//! Brief description of the module's purpose.
-//!
-//! ## Overview
-//!
-//! More detailed explanation.
-//!
-//! ## Examples
-//!
-//! ```rust
-//! use crate::module::Type;
-//! let instance = Type::new();
-//! ```
-```
+## Use no_run on Doc Examples
+Feature flag complexity makes doc tests hard to maintain.
+All real coverage via #[cfg(test)] modules and tests/ directory.
 
-## Struct Documentation
 ```rust
-/// A client for interacting with the API.
-///
-/// # Examples
-///
-/// ```
-/// let client = Client::new();
-/// ```
-///
-/// ## With custom configuration
-///
-/// ```
-/// let client = Client::builder()
-///     .base_url("http://localhost:8080")
-///     .timeout(Duration::from_secs(60))
-///     .build()?;
-/// ```
-pub struct Client { ... }
-```
-
-## Method Documentation
-```rust
-/// Sends a request to generate text.
-///
-/// # Arguments
-///
-/// * `request` - The generation parameters
-///
-/// # Returns
-///
-/// The complete generated response.
-///
-/// # Errors
-///
-/// * [`Error::ModelNotFound`] - If the model doesn't exist
-/// * [`Error::Timeout`] - If the request exceeds timeout
+/// Request body for POST /api/chat endpoint.
 ///
 /// # Examples
 ///
 /// ```no_run
-/// let response = client.generate(request).await?;
+/// use ollama_oxide::{ChatRequest, ChatMessage};
+///
+/// let request = ChatRequest::new("model", [
+///     ChatMessage::user("Hello!")
+/// ]);
 /// ```
-pub async fn generate(&self, request: Request) -> Result<Response> { ... }
+pub struct ChatRequest { ... }
 ```
 
 # Example Files
@@ -800,31 +731,54 @@ pub async fn generate(&self, request: Request) -> Result<Response> { ... }
 ## Naming Convention
 ```
 examples/
-├── feature_basic_async.rs      # Basic async usage
-├── feature_basic_sync.rs       # Basic sync usage
-├── feature_advanced_async.rs   # Advanced async usage
-├── feature_with_options.rs     # With various options
-└── feature_streaming.rs        # Streaming example
+├── chat_async.rs                  # Basic async chat
+├── chat_with_tools_async.rs       # Chat with tools (requires "tools")
+├── generate_async.rs              # Basic async generation
+├── model_list_async.rs            # List models (requires "model")
+├── model_create_async.rs          # Create model (requires "model")
+└── embed_async.rs                 # Basic async embedding
+```
+
+## Cargo.toml Registration
+```toml
+[[example]]
+name = "chat_async"
+required-features = []
+
+[[example]]
+name = "chat_with_tools_async"
+required-features = ["tools"]
+
+[[example]]
+name = "model_list_async"
+required-features = ["model"]
 ```
 
 ## Example Structure
 ```rust
-//! Example: Basic Feature Usage
+//! Example: Basic chat usage
 //!
-//! ## Running
-//!
-//! ```bash
-//! cargo run --example feature_basic_async
-//! ```
+//! Requires a running Ollama instance.
+//! Run with: cargo run --example chat_async
 
-use library::{Client, Request};
+use ollama_oxide::{OllamaClient, OllamaApiAsync, ChatRequest, ChatMessage};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
-    let request = Request::new("param");
-    let response = client.method(request).await?;
-    println!("Result: {}", response.result);
+    let client = OllamaClient::default()?;
+
+    let request = ChatRequest::new("qwen3:0.6b", [
+        ChatMessage::user("Hello, how are you?"),
+    ]);
+
+    let response = client.chat(&request).await?;
+
+    println!("Response: {}", response.content().unwrap_or(""));
+
+    if let Some(ms) = response.total_duration_ms() {
+        println!("Duration: {:.1}ms", ms);
+    }
+
     Ok(())
 }
 ```
@@ -835,9 +789,7 @@ PART 7: IMPLEMENTATION WORKFLOW
 
 # Implementation Plan Structure
 
-Each feature/endpoint requires an implementation plan before coding.
-
-Location: spec/impl-plans/NN-feature-implementation-plan.md
+Location: impl/NN-feature-implementation-plan.md
 
 ## Plan Template
 ```markdown
@@ -846,474 +798,95 @@ Location: spec/impl-plans/NN-feature-implementation-plan.md
 **Endpoint:** METHOD /api/endpoint
 **Complexity:** Simple | Medium | Complex
 **Streaming:** Yes | No
+**Feature Flag:** inference | model | tools
 **Status:** Planning | In Progress | Complete
 
-## Overview
-Brief description of what this feature does.
-
-## Request Type
-
-### Fields
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | String | Yes | Field description |
-
-## Response Type
-
-### Fields
-| Field | Type | Description |
-|-------|------|-------------|
-| result | String | Field description |
+## Request/Response Types
+(field tables)
 
 ## Implementation Steps
 
-### 1. Types (primitives/)
-- [ ] Create request struct
-- [ ] Create response struct
-- [ ] Implement builders if needed
+### 1. Types (inference/ or model/)
+- [ ] Create request struct in {type}_request.rs
+- [ ] Create response struct in {type}_response.rs
+- [ ] Add with-method chain setters
 - [ ] Add serde attributes
+- [ ] Add accessor methods
+- [ ] Re-export in mod.rs and lib.rs
 
 ### 2. HTTP Layer (http/)
-- [ ] Add endpoint method to client
-- [ ] Implement async version
-- [ ] Implement sync version
-- [ ] Add error handling
+- [ ] Add Endpoint constant to endpoints.rs
+- [ ] Add async method to OllamaApiAsync trait
+- [ ] Add blocking method to OllamaApiSync trait
+- [ ] Implement async with retry helper
+- [ ] Implement blocking with retry helper
 
 ### 3. Tests
 - [ ] Request serialization tests
 - [ ] Response deserialization tests
-- [ ] Validation tests
+- [ ] With-method chain tests
+- [ ] Clone/equality tests
+- [ ] HTTP client tests with mockito
+- [ ] Feature-gated tests (if applicable)
 
 ### 4. Examples
-- [ ] Basic usage example
+- [ ] Basic usage example in examples/
+- [ ] Register in Cargo.toml [[example]]
 ```
 
-# Implementation Workflow
+# Endpoint Complexity Categories
 
-## Step 1: Write Types
+## Simple (GET, no body)
 ```rust
-// src/primitives/feature.rs
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FeatureRequest {
-    pub required_field: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub optional_field: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct FeatureResponse {
-    pub result: String,
+// version, list_models, list_running_models
+async fn version(&self) -> Result<VersionResponse> {
+    let url = self.config.url(Endpoints::VERSION);
+    self.get_with_retry(&url).await
 }
 ```
 
-## Step 2: Add to Module
+## Medium (POST, body → JSON response)
 ```rust
-// src/primitives/mod.rs
-mod feature;
-pub use feature::{FeatureRequest, FeatureResponse};
-```
-
-## Step 3: Implement HTTP Method
-```rust
-// src/http/endpoints/feature.rs
-impl Client {
-    pub async fn feature(&self, request: FeatureRequest) -> Result<FeatureResponse> {
-        let url = format!("{}/api/feature", self.base_url);
-        let response = self.client
-            .post(&url)
-            .json(&request)
-            .send()
-            .await?;
-
-        if !response.status().is_success() {
-            return Err(Error::api_error(response).await);
-        }
-
-        Ok(response.json().await?)
-    }
-
-    pub fn feature_sync(&self, request: FeatureRequest) -> Result<FeatureResponse> {
-        self.runtime.block_on(self.feature(request))
-    }
+// chat, generate, embed, show, create, pull, push
+async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse> {
+    let url = self.config.url(Endpoints::CHAT);
+    self.post_with_retry(&url, request).await
 }
 ```
 
-## Step 4: Write Tests
+## Empty Response (POST/DELETE, body → 200 OK)
 ```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn request_serialization() {
-        let request = FeatureRequest {
-            required_field: "value".to_string(),
-            optional_field: None,
-        };
-        let json = serde_json::to_string(&request).unwrap();
-        assert!(json.contains("required_field"));
-        assert!(!json.contains("optional_field"));
-    }
-}
-```
-
-## Step 5: Create Example
-```rust
-// examples/feature_basic_async.rs
-use library::{Client, FeatureRequest};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
-
-    let request = FeatureRequest {
-        required_field: "example".to_string(),
-        optional_field: Some("optional".to_string()),
-    };
-
-    let response = client.feature(request).await?;
-    println!("Result: {}", response.result);
-
-    Ok(())
+// copy, delete
+async fn copy_model(&self, request: &CopyRequest) -> Result<()> {
+    let url = self.config.url(Endpoints::COPY);
+    self.post_empty_with_retry(&url, request).await
 }
 ```
 
 # Checklist Before Moving On
 
 - [ ] Types compile without warnings
+- [ ] Single concern per file (one type per .rs file)
+- [ ] mod.rs only contains re-exports
+- [ ] lib.rs re-exports all public types
 - [ ] Serde serialization works correctly
-- [ ] HTTP method returns expected results
-- [ ] Tests pass
-- [ ] Example compiles and runs
-- [ ] Documentation is complete
+- [ ] With-method chain setters for all optional fields
+- [ ] Accessor methods for key fields
+- [ ] Endpoint constant added
+- [ ] Async trait method + implementation
+- [ ] Blocking trait method + implementation
+- [ ] Feature gates applied correctly
+- [ ] Unit tests in source file
+- [ ] Integration tests in tests/ with mockito
+- [ ] Example in examples/ with Cargo.toml entry
+- [ ] Documentation complete
 - [ ] CHANGELOG updated
-
-# Streaming Implementation
-
-```rust
-use futures_util::Stream;
-use tokio_stream::StreamExt;
-
-impl Client {
-    pub async fn feature_stream(
-        &self,
-        request: FeatureRequest,
-    ) -> Result<impl Stream<Item = Result<FeatureChunk>>> {
-        let url = format!("{}/api/feature", self.base_url);
-        let response = self.client
-            .post(&url)
-            .json(&request)
-            .send()
-            .await?;
-
-        let stream = response
-            .bytes_stream()
-            .map(|chunk| {
-                let bytes = chunk?;
-                let line = std::str::from_utf8(&bytes)?;
-                serde_json::from_str(line)
-                    .map_err(Into::into)
-            });
-
-        Ok(stream)
-    }
-}
-```
+- [ ] cargo test --all-features passes
+- [ ] cargo clippy --all-features passes
+- [ ] cargo fmt --check passes
 
 ================================================================================
-PART 8: REFERENCE IMPLEMENTATION EXAMPLES
-================================================================================
-
-# Project Structure Example
-
-```
-library/
-├── Cargo.toml                    # Single crate configuration
-├── src/
-│   ├── lib.rs                    # Crate root with re-exports
-│   ├── primitives/               # Type definitions
-│   │   ├── mod.rs
-│   │   ├── generate.rs
-│   │   ├── chat.rs
-│   │   └── embed.rs
-│   ├── http/                     # HTTP client
-│   │   ├── mod.rs
-│   │   ├── client.rs
-│   │   └── endpoints/
-│   └── conveniences/             # High-level APIs (feature-gated)
-├── spec/
-│   ├── definition.md             # Project definition
-│   ├── api-analysis.md           # API complexity analysis
-│   ├── primitives/               # YAML specs per endpoint
-│   └── impl-plans/               # Implementation plans
-├── examples/
-└── tests/
-    └── integration/
-```
-
-# Complete Type Definition Example
-
-```rust
-use serde::{Deserialize, Serialize};
-
-/// Request for text generation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GenerateRequest {
-    /// The model to use for generation.
-    pub model: String,
-
-    /// The prompt to generate from.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub prompt: Option<String>,
-
-    /// Whether to stream the response.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub stream: Option<bool>,
-
-    /// Sampling temperature (0.0-2.0).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub temperature: Option<f32>,
-}
-
-impl GenerateRequest {
-    /// Create a new generate request.
-    pub fn new(model: impl Into<String>, prompt: impl Into<String>) -> Self {
-        Self {
-            model: model.into(),
-            prompt: Some(prompt.into()),
-            stream: None,
-            temperature: None,
-        }
-    }
-
-    /// Create a builder for more complex requests.
-    pub fn builder() -> GenerateRequestBuilder {
-        GenerateRequestBuilder::default()
-    }
-}
-
-/// Response from text generation.
-#[derive(Debug, Clone, Deserialize)]
-pub struct GenerateResponse {
-    /// The model that was used.
-    pub model: String,
-
-    /// The generated text.
-    pub response: String,
-
-    /// Whether generation is complete.
-    pub done: bool,
-
-    /// Context tokens for continuation.
-    #[serde(default)]
-    pub context: Vec<i64>,
-}
-```
-
-# Complete Builder Example
-
-```rust
-#[derive(Default)]
-pub struct GenerateRequestBuilder {
-    model: Option<String>,
-    prompt: Option<String>,
-    stream: Option<bool>,
-    temperature: Option<f32>,
-}
-
-impl GenerateRequestBuilder {
-    pub fn model(mut self, model: impl Into<String>) -> Self {
-        self.model = Some(model.into());
-        self
-    }
-
-    pub fn prompt(mut self, prompt: impl Into<String>) -> Self {
-        self.prompt = Some(prompt.into());
-        self
-    }
-
-    pub fn stream(mut self, stream: bool) -> Self {
-        self.stream = Some(stream);
-        self
-    }
-
-    pub fn temperature(mut self, temp: f32) -> Self {
-        self.temperature = Some(temp);
-        self
-    }
-
-    pub fn build(self) -> Result<GenerateRequest, ValidationError> {
-        let model = self.model
-            .ok_or_else(|| ValidationError::missing_field("model"))?;
-
-        Ok(GenerateRequest {
-            model,
-            prompt: self.prompt,
-            stream: self.stream,
-            temperature: self.temperature,
-        })
-    }
-}
-```
-
-# Complete HTTP Client Example
-
-```rust
-use crate::error::{Error, Result};
-use crate::primitives::*;
-use reqwest::Client as HttpClient;
-use std::time::Duration;
-
-/// Client for the API.
-pub struct Client {
-    http: HttpClient,
-    base_url: String,
-}
-
-impl Client {
-    /// Create a new client with default settings.
-    pub fn new() -> Self {
-        Self::with_base_url("http://localhost:11434")
-    }
-
-    /// Create a client with a custom base URL.
-    pub fn with_base_url(url: impl Into<String>) -> Self {
-        Self {
-            http: HttpClient::builder()
-                .timeout(Duration::from_secs(30))
-                .build()
-                .expect("Failed to create HTTP client"),
-            base_url: url.into(),
-        }
-    }
-
-    fn url(&self, path: &str) -> String {
-        format!("{}{}", self.base_url, path)
-    }
-
-    /// Generate text from a prompt.
-    pub async fn generate(&self, request: GenerateRequest) -> Result<GenerateResponse> {
-        let mut request = request;
-        request.stream = Some(false);
-
-        let url = self.url("/api/generate");
-
-        let response = self.http
-            .post(&url)
-            .json(&request)
-            .send()
-            .await?;
-
-        if !response.status().is_success() {
-            return Err(self.extract_error(response).await);
-        }
-
-        response.json().await.map_err(Into::into)
-    }
-
-    /// Generate text (blocking version).
-    pub fn generate_sync(&self, request: GenerateRequest) -> Result<GenerateResponse> {
-        tokio::runtime::Runtime::new()
-            .expect("Failed to create runtime")
-            .block_on(self.generate(request))
-    }
-}
-
-impl Default for Client {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-```
-
-# Complete Test Example
-
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_generate_request_serialization() {
-        let request = GenerateRequest::new("llama3", "Hello");
-        let json = serde_json::to_string(&request).unwrap();
-
-        assert!(json.contains(r#""model":"llama3""#));
-        assert!(json.contains(r#""prompt":"Hello""#));
-        assert!(!json.contains("temperature"));
-    }
-
-    #[test]
-    fn test_generate_response_deserialization() {
-        let json = r#"{
-            "model": "llama3",
-            "response": "Hi there!",
-            "done": true,
-            "context": [1, 2, 3]
-        }"#;
-
-        let response: GenerateResponse = serde_json::from_str(json).unwrap();
-
-        assert_eq!(response.model, "llama3");
-        assert_eq!(response.response, "Hi there!");
-        assert!(response.done);
-        assert_eq!(response.context, vec![1, 2, 3]);
-    }
-
-    #[test]
-    fn test_builder_validates_required_fields() {
-        let result = GenerateRequestBuilder::default()
-            .prompt("Hello")
-            .build();
-
-        assert!(result.is_err());
-    }
-}
-```
-
-# Complete Example File
-
-```rust
-//! Basic async generation example.
-//!
-//! ## Running
-//!
-//! ```bash
-//! cargo run --example generate_basic_async
-//! ```
-
-use library::{Client, GenerateRequest};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
-
-    let request = GenerateRequest::new("llama3", "Why is the sky blue?");
-
-    println!("Generating response...");
-    let response = client.generate(request).await?;
-
-    println!("Model: {}", response.model);
-    println!("Response: {}", response.response);
-
-    Ok(())
-}
-```
-
-# Key Patterns Summary
-
-| Pattern | When to Use | Example |
-|---------|-------------|---------|
-| new() constructor | Required fields only | Request::new("model") |
-| Builder pattern | 3+ optional fields | Request::builder().field(v).build() |
-| impl Into<String> | String-like parameters | fn new(s: impl Into<String>) |
-| skip_serializing_if | Optional serde fields | #[serde(skip_serializing_if = "Option::is_none")] |
-| _sync suffix | Blocking variants | client.generate_sync(req) |
-| _stream suffix | Streaming variants | client.generate_stream(req) |
-
-================================================================================
-PART 9: DECISION FRAMEWORK
+PART 8: DECISION FRAMEWORK
 ================================================================================
 
 When facing implementation choices:
@@ -1329,7 +902,7 @@ HOW TO RESPOND
 
 When helping with Rust library development:
 
-1. **Always ask which phase** the developer is in (Analyze, Plan, Design, Implement, Verify)
+1. **Always ask which phase** the developer is in (Analyze, Plan, Specification, Implement, Verify)
 2. **Follow the methodology strictly** - don't skip phases
 3. **Provide complete code examples** using the patterns documented above
 4. **Suggest creating specs before implementing** - specs come first
@@ -1340,6 +913,6 @@ When helping with Rust library development:
 
 When asked to implement something:
 1. First ask: "Do you have a YAML spec for this feature?"
-2. If no: "Let's create the spec first in spec/primitives/"
-3. If yes: "Let's create the implementation plan in spec/impl-plans/"
+2. If no: "Let's create the spec first in spec/apis/"
+3. If yes: "Let's create the implementation plan in impl/"
 4. Then proceed with implementation following the workflow"""

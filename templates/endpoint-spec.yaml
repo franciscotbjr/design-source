@@ -1,11 +1,15 @@
 # Template: Endpoint Specification
-# Location: spec/primitives/NN-endpoint-name.yaml
+# Location: spec/apis/NN-endpoint-name.yaml
 
 # Endpoint metadata
 endpoint: METHOD /api/endpoint-path
 complexity: simple | medium | complex
 streaming: false  # or true
 status: draft | ready | implemented
+
+# Feature flag that gates this endpoint
+# Values: inference (default), model, tools
+feature: inference
 
 # Brief description
 description: |
@@ -22,7 +26,7 @@ request:
       required: true
       description: The model name to use
 
-    # Optional field
+    # Optional field (with-method chain pattern)
     - name: prompt
       type: Option<String>
       required: false
@@ -38,20 +42,27 @@ request:
 
     # Enum field
     - name: format
-      type: Option<Format>
+      type: Option<FormatSetting>
       required: false
       description: Output format
       values: [json, text]
 
     # Nested object
     - name: options
-      type: Option<Options>
+      type: Option<ModelOptions>
       required: false
       description: Model parameters
       nested:
         - name: temperature
           type: f32
           description: Sampling temperature
+
+    # Feature-gated field (only present when feature is enabled)
+    - name: tools
+      type: Option<Vec<ToolDefinition>>
+      required: false
+      description: Tool definitions for function calling
+      feature_gate: tools  # #[cfg(feature = "tools")]
 
   validation:
     - Model name must not be empty
@@ -84,6 +95,24 @@ response:
     - name: context
       type: Option<Vec<i64>>
       description: Context tokens for continuation
+
+  # Helper methods on response type
+  helpers:
+    - name: content
+      return_type: Option<&str>
+      description: Convenience accessor for response content
+
+    - name: is_done
+      return_type: bool
+      description: Whether generation is complete
+
+    - name: total_duration_ms
+      return_type: Option<f64>
+      description: Total duration in milliseconds (converted from nanoseconds)
+
+    - name: tokens_per_second
+      return_type: Option<f64>
+      description: Calculated tokens per second metric
 
   example: |
     {
@@ -130,6 +159,21 @@ errors:
     condition: Internal server error
     example: |
       {"error": "internal error"}
+
+# Trait method definitions
+# These define the methods on OllamaApiAsync and OllamaApiSync traits
+trait_methods:
+  async:
+    name: endpoint_name              # Method name on OllamaApiAsync trait
+    signature: "async fn endpoint_name(&self, request: &EndpointRequest) -> Result<EndpointResponse>"
+  sync:
+    name: endpoint_name_blocking     # Method name on OllamaApiSync trait (_blocking suffix)
+    signature: "fn endpoint_name_blocking(&self, request: &EndpointRequest) -> Result<EndpointResponse>"
+  # Retry helper used internally
+  retry_helper: post_with_retry      # or get_with_retry, post_empty_with_retry, delete_empty_with_retry
+
+# Endpoint constant
+endpoint_constant: "Endpoints::ENDPOINT_NAME"  # From src/http/endpoints.rs
 
 # Implementation notes
 notes: |
