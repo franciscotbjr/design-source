@@ -6,9 +6,10 @@
 
 | File | Purpose |
 |------|---------|
-| `README.md` | Project overview, quick start |
+| `README.md` | Project overview, quick start, feature flags |
 | `CHANGELOG.md` | Version history |
-| `CONTRIBUTING.md` | How to contribute |
+| `CONTRIBUTING.md` | How to contribute, development setup |
+| `ARCHITECTURE.md` | Module structure, design patterns, dependency rules |
 | `LICENSE` | License terms |
 
 ### Development Files
@@ -16,7 +17,6 @@
 | File | Purpose |
 |------|---------|
 | `DEV_NOTES.md` | Development notes, discoveries |
-| `ARCHITECTURE.md` | Module structure, design |
 | `DECISIONS.md` | Architectural decisions log |
 | `BLOCKERS.md` | Pending decisions, blockers |
 
@@ -50,15 +50,30 @@ Add to your `Cargo.toml`:
 crate-name = "0.1"
 \`\`\`
 
+### Feature Flags
+
+| Feature | Default | Description |
+|---------|---------|-------------|
+| `http` | Yes | HTTP client layer |
+| `inference` | Yes | Inference types (chat, generate, embed) |
+| `model` | No | Model management operations |
+| `tools` | No | Function calling with schema generation |
+
+\`\`\`toml
+# All features
+crate-name = { version = "0.1", features = ["model", "tools"] }
+\`\`\`
+
 ## Quick Start
 
 \`\`\`rust
-use crate_name::Client;
+use crate_name::{OllamaClient, OllamaApiAsync};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
-    // Example code
+    let client = OllamaClient::default()?;
+    let version = client.version().await?;
+    println!("Version: {}", version.version);
     Ok(())
 }
 \`\`\`
@@ -66,6 +81,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ## Documentation
 
 - [API Documentation](https://docs.rs/crate-name)
+- [Architecture Guide](ARCHITECTURE.md)
 - [Examples](examples/)
 - [Contributing](CONTRIBUTING.md)
 
@@ -73,6 +89,65 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 MIT
 ```
+
+## ARCHITECTURE.md Structure
+
+ARCHITECTURE.md is a **required** file that documents the module organization, design patterns, and dependency rules. It serves as the primary reference for understanding the codebase structure.
+
+### Required Sections
+
+```markdown
+# Architecture Guide
+
+## Design Principles
+- Single Concern Per File (one type per .rs file)
+- Module as Facade (mod.rs = declarations + re-exports only)
+- Explicit Over Implicit (file names match primary types)
+
+## Module Organization Rule
+- Show the canonical module structure with mod.rs + type files
+- Include a concrete example from the project
+
+## Current Structure
+- Full `src/` tree showing all modules, files, and their purposes
+- Feature annotations: which feature flag gates each module
+
+## Feature Flag Architecture
+- Feature table from Cargo.toml
+- Feature dependency graph (ASCII or Mermaid)
+- Conditional compilation patterns (module, field, method levels)
+
+## Adding New Components
+- Step-by-step for new type, new endpoint, new configuration
+- Reference the pattern of existing implementations
+
+## Design Patterns
+- Visibility control (pub(super), pub(crate))
+- Trait per concern (OllamaApiAsync / OllamaApiSync)
+- Dependency hierarchy with rules table
+
+## Architecture Diagrams (Mermaid)
+- Module and component relations (class diagram)
+- API call flow (state diagram)
+- Request/Response type patterns
+- Tool execution flow (if applicable)
+
+## Testing Architecture
+- Unit tests in source files (internal behavior)
+- Public interface tests in tests/ (mockito, no external deps)
+- Integration tests as examples/ (require running server)
+
+## Version History
+- Track architectural changes with dates
+```
+
+### Key Principles for ARCHITECTURE.md
+
+1. **Keep it current** - Update when module structure changes
+2. **Show real code** - Use actual project examples, not generic placeholders
+3. **Document rules** - Dependency direction, visibility, feature flag patterns
+4. **Include diagrams** - Mermaid diagrams for complex relationships
+5. **Version history** - Track architectural evolution with dates
 
 ## CHANGELOG.md Format
 
@@ -132,15 +207,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Decisions
 
-[2024-01-15] **Use thiserror for error handling**
-- Context: Need a consistent error handling approach
-- Decision: Use thiserror crate for derive macros
-- Consequences: Clean error definitions, automatic Display impl
+[2024-01-15] **With-method chain pattern over Builder pattern**
+- Context: Requests have many optional fields, need ergonomic construction
+- Decision: Use `with_*()` methods returning Self instead of separate Builder types
+- Consequences: Simpler API, no separate builder struct, chainable calls
 
-[2024-01-16] **Builder pattern for complex requests**
-- Context: Requests have many optional fields
-- Decision: Implement builder pattern for requests with 3+ optional fields
-- Consequences: Ergonomic API, type-safe construction
+[2024-01-16] **Trait-based API with async_trait**
+- Context: Need both async and sync interfaces for the HTTP client
+- Decision: Define OllamaApiAsync and OllamaApiSync traits, implement on OllamaClient
+- Consequences: Clear API contract, testable via mock implementations
+
+[2024-01-17] **{Type}Error suffix for error variants**
+- Context: Need clear, descriptive error variant names
+- Decision: Use descriptive suffixes like HttpError, TimeoutError, MaxRetriesExceededError
+- Consequences: Self-documenting error types, easy to match on
 ```
 
 ## BLOCKERS.md Format
@@ -164,14 +244,9 @@ Pending decisions and blockers that need resolution.
   - Option B: async-stream
   - Blocks: All streaming endpoints
 
-- **[API]** Decide on error response format
-  - Option A: Match upstream API exactly
-  - Option B: Normalize errors
-  - Blocks: Error handling implementation
-
 ## Resolved
 
-- ~~**[Architecture]** Module organization~~ - Resolved: Three-layer architecture
+- ~~**[Architecture]** Module organization~~ - Resolved: Feature-flagged modules
 ```
 
 ## Rustdoc Guidelines
@@ -188,11 +263,11 @@ Pending decisions and blockers that need resolution.
 //!
 //! ## Examples
 //!
-//! ```rust
+//! ```no_run
 //! use crate::module::Type;
 //!
-//! let instance = Type::new();
-//! instance.method();
+//! let instance = Type::new("param");
+//! let configured = instance.with_option("value");
 //! ```
 //!
 //! ## Related
@@ -202,119 +277,205 @@ Pending decisions and blockers that need resolution.
 
 ### Struct Documentation
 ```rust
-/// A client for interacting with the API.
+/// A request to generate chat completions.
 ///
-/// The client handles HTTP communication, authentication,
-/// and request/response serialization.
+/// Uses with-method chain pattern for optional fields.
 ///
 /// # Examples
 ///
-/// ## Creating a client
+/// ## Basic usage
 ///
-/// ```
-/// let client = Client::new();
+/// ```no_run
+/// let request = ChatRequest::new("model", [ChatMessage::user("Hello")]);
 /// ```
 ///
-/// ## With custom configuration
+/// ## With options
 ///
+/// ```no_run
+/// let request = ChatRequest::new("model", [ChatMessage::user("Hello")])
+///     .with_options(ModelOptions::new().with_temperature(0.7))
+///     .with_format(FormatSetting::json());
 /// ```
-/// let client = Client::builder()
-///     .base_url("http://localhost:8080")
-///     .timeout(Duration::from_secs(60))
-///     .build()?;
-/// ```
-pub struct Client { ... }
+pub struct ChatRequest { ... }
 ```
 
 ### Method Documentation
 ```rust
-/// Sends a request to generate text.
+/// Sends a chat request and returns the complete response.
 ///
-/// This method sends the request and waits for the complete response.
-/// For streaming responses, use [`generate_stream`](Self::generate_stream).
+/// For streaming responses, use [`chat_stream`](Self::chat_stream).
 ///
 /// # Arguments
 ///
-/// * `request` - The generation parameters
+/// * `request` - The chat parameters including model and messages
 ///
 /// # Returns
 ///
-/// The complete generated response.
+/// The complete chat response with content and metadata.
 ///
 /// # Errors
 ///
-/// * [`Error::ModelNotFound`] - If the specified model doesn't exist
-/// * [`Error::Timeout`] - If the request exceeds the timeout
+/// * [`HttpError`](crate::Error::HttpError) - HTTP communication failure
+/// * [`TimeoutError`](crate::Error::TimeoutError) - Request exceeded timeout
+/// * [`MaxRetriesExceededError`](crate::Error::MaxRetriesExceededError) - All retries failed
 ///
 /// # Examples
 ///
 /// ```no_run
-/// # async fn example() -> Result<(), Error> {
-/// let response = client.generate(request).await?;
-/// println!("{}", response.text);
+/// # async fn example() -> Result<(), ollama_oxide::Error> {
+/// let response = client.chat(&request).await?;
+/// println!("{}", response.content().unwrap_or("No response"));
 /// # Ok(())
 /// # }
 /// ```
-///
-/// # See Also
-///
-/// * [`generate_stream`](Self::generate_stream) - Streaming variant
-pub async fn generate(&self, request: Request) -> Result<Response> { ... }
+pub async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse> { ... }
 ```
+
+### Doc Test Convention
+
+All doc examples use `no_run` attribute:
+```rust
+/// ```no_run
+/// let client = OllamaClient::default()?;
+/// ```
+```
+
+**Rationale:** Doc examples require a running Ollama server. Real test coverage comes from unit tests (mockito) and integration test examples.
 
 ## Example Files
 
 ### Naming Convention
+
+Pattern: `{feature}_{variant}_{mode}.rs`
+
+| Component | Values | Description |
+|-----------|--------|-------------|
+| `feature` | `chat`, `generate`, `embed`, `model_create`, etc. | The API feature being demonstrated |
+| `variant` | (optional) `with_tools`, `cli`, `concise`, `custom` | Specific variation or configuration |
+| `mode` | `async`, `sync` | Async or sync execution mode |
+
+### Real Examples from ollama-oxide
+
 ```
 examples/
-├── feature_basic_async.rs      # Basic async usage
-├── feature_basic_sync.rs       # Basic sync usage
-├── feature_advanced_async.rs   # Advanced async usage
-├── feature_with_options.rs     # With various options
-└── feature_streaming.rs        # Streaming example
+├── chat_async.rs                      # Basic chat (async)
+├── chat_sync.rs                       # Basic chat (sync)
+├── chat_cli_async.rs                  # Interactive CLI chat
+├── chat_with_tools_async.rs           # Chat with tool definitions
+├── chat_with_tools_registry_async.rs  # Chat with ToolRegistry dispatch
+├── generate_async.rs                  # Text generation (async)
+├── generate_sync.rs                   # Text generation (sync)
+├── generate_concise.rs                # Minimal generation example
+├── embed_async.rs                     # Embeddings (async)
+├── embed_sync.rs                      # Embeddings (sync)
+├── get_version_async.rs               # Server version (async)
+├── get_version_sync.rs                # Server version (sync)
+├── get_version_custom.rs              # Version with custom config
+├── list_models_async.rs               # List models (async)
+├── list_models_sync.rs                # List models (sync)
+├── list_running_models_async.rs       # Running models (async)
+├── list_running_models_sync.rs        # Running models (sync)
+├── show_model_async.rs                # Show model info (async)
+├── show_model_sync.rs                 # Show model info (sync)
+├── copy_model_async.rs                # Copy model (async)
+├── copy_model_sync.rs                 # Copy model (sync)
+├── model_create_async.rs              # Create model (async)
+├── model_delete_async.rs              # Delete model (async)
+├── model_delete_sync.rs               # Delete model (sync)
+├── model_cleanup_async.rs             # Delete multiple models
+├── pull_model_async.rs                # Pull model (async)
+├── pull_model_sync.rs                 # Pull model (sync)
+├── push_model_async.rs                # Push model (async)
+├── push_model_sync.rs                 # Push model (sync)
+└── tools_async.rs                     # Tools module standalone
 ```
 
-### Example Structure
-```rust
-//! Example: Basic Feature Usage
-//!
-//! This example demonstrates how to use the feature API.
-//!
-//! ## Running
-//!
-//! ```bash
-//! cargo run --example feature_basic_async
-//! ```
+### Example File Structure
 
-use library::{Client, Request};
+```rust
+//! Example: Chat completion (async)
+//!
+//! This example demonstrates how to use the chat API
+//! for conversational interactions.
+//!
+//! Run with: cargo run --example chat_async
+//!
+//! Note: Requires a running Ollama server with a model installed
+//! (e.g., qwen3:0.6b, llama3.2, etc.)
+
+use ollama_oxide::{
+    ChatMessage, ChatRequest, OllamaApiAsync, OllamaClient,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Setup
-    let client = Client::new();
+    // Create client with default configuration
+    let client = OllamaClient::default()?;
 
-    // Create request
-    let request = Request::new("param");
+    // Model to use
+    let model = "qwen3:0.6b";
+
+    // Build request with with-method chain
+    let request = ChatRequest::new(
+        model,
+        [ChatMessage::user("Hello! What can you help me with?")],
+    );
 
     // Execute
-    let response = client.method(request).await?;
+    let response = client.chat(&request).await?;
 
-    // Output
-    println!("Result: {}", response.result);
+    // Access response via helper methods
+    println!("Assistant: {}", response.content().unwrap_or("No response"));
+    println!("Done: {}", response.is_done());
 
     Ok(())
 }
 ```
 
+### Feature-Gated Examples in Cargo.toml
+
+```toml
+[[example]]
+name = "chat_async"
+# No required-features: uses default features
+
+[[example]]
+name = "chat_with_tools_async"
+required-features = ["tools"]
+
+[[example]]
+name = "model_create_async"
+required-features = ["model"]
+```
+
 ## Specification Files
 
+### Directory Structure
+
+```
+spec/
+├── apis/                    # API endpoint specifications
+│   ├── 01-version.yaml
+│   ├── 02-generate.yaml
+│   ├── 03-chat.yaml
+│   └── ...
+└── api-analysis.md          # Endpoint complexity analysis
+
+impl/                        # Implementation plans
+├── phase-1.md
+├── phase-2.md
+└── ...
+```
+
 ### YAML Spec Format
+
 ```yaml
-# spec/primitives/01-endpoint-name.yaml
+# spec/apis/01-endpoint-name.yaml
 
 endpoint: POST /api/endpoint
 complexity: simple | medium | complex
 streaming: true | false
+feature: inference | model | tools
 
 description: |
   Brief description of what this endpoint does.
@@ -354,4 +515,8 @@ errors:
     description: Invalid request
   - status: 404
     description: Resource not found
+
+trait_methods:
+  async: endpoint_name
+  sync: endpoint_name_blocking
 ```
