@@ -12,11 +12,11 @@ The AI assistant must demonstrate proficiency in the following areas:
 3. **Error Handling** - thiserror, Result patterns, error propagation
 4. **Serialization** - serde, JSON, custom serializers/deserializers
 5. **HTTP Clients** - reqwest, async HTTP, request/response handling
-6. **Testing** - Unit tests, integration tests, mocking
+6. **Testing** - Unit tests, integration tests, mocking with mockito
 
 ### Design Skills (4 required)
-1. **API Design** - Ergonomic interfaces, builder patterns, type safety
-2. **Module Organization** - Crate structure, visibility, re-exports
+1. **API Design** - Ergonomic interfaces, builder patterns, with-method chains, type safety
+2. **Module Organization** - Crate structure, feature flags, visibility, re-exports
 3. **Documentation** - Rustdoc, examples, README patterns
 4. **Versioning** - Semantic versioning, changelog management
 
@@ -51,14 +51,14 @@ Output: Implementation plan with phases
 3. Identify blocking decisions
 4. Document in spec/definition.md
 
-### 3. Primitive Design Phase
+### 3. Specification Phase
 ```
 Input: API analysis
 Output: YAML specification files
 ```
 
 **Steps:**
-1. Create spec/primitives/ directory
+1. Create spec/apis/ directory
 2. Write YAML spec for each endpoint/feature
 3. Define request/response types
 4. Document validation rules
@@ -71,8 +71,8 @@ Output: Rust source code
 ```
 
 **Steps:**
-1. Create implementation plan (spec/impl-plans/)
-2. Implement types in src/primitives/
+1. Create implementation plan (impl/)
+2. Implement types in src/inference/ (or src/model/, src/tools/)
 3. Implement HTTP layer in src/http/
 4. Write tests alongside code
 5. Create examples in examples/
@@ -84,8 +84,8 @@ Output: Verified, documented code
 ```
 
 **Steps:**
-1. Run cargo clippy and fix warnings
-2. Run cargo test
+1. Run cargo clippy --all-features and fix warnings
+2. Run cargo test --all-features
 3. Verify examples compile and run
 4. Update CHANGELOG.md
 5. Update README.md if needed
@@ -97,34 +97,55 @@ Output: Verified, documented code
 spec/
 ├── definition.md          # Project definition and phases
 ├── api-analysis.md        # API complexity analysis
-├── primitives/            # Per-endpoint YAML specs
-│   ├── 01-endpoint.yaml
-│   └── ...
-└── impl-plans/            # Implementation strategies
-    ├── 01-feature-plan.md
+└── apis/                  # Per-endpoint YAML specs
+    ├── 01-endpoint.yaml
     └── ...
+
+impl/                      # Implementation plans
+├── 01-feature-plan.md
+└── ...
 ```
 
 ### Source Files
 ```
 src/
-├── lib.rs                 # Crate root, re-exports
-├── primitives/            # Type definitions
+├── lib.rs                 # Crate root, feature-gated re-exports
+├── error.rs               # Error enum with {Type}Error variants
+├── inference/             # Feature: "inference" (default)
+│   ├── mod.rs             # Facade: mod + pub use only
+│   ├── chat_request.rs    # One type per file
+│   ├── chat_response.rs
+│   ├── chat_message.rs
+│   ├── generate_request.rs
+│   └── ...
+├── model/                 # Feature: "model"
 │   ├── mod.rs
-│   ├── requests.rs
-│   └── responses.rs
-├── http/                  # HTTP client implementation
+│   ├── show_request.rs
+│   ├── delete_request.rs
+│   └── ...
+├── tools/                 # Feature: "tools"
 │   ├── mod.rs
-│   ├── client.rs
-│   └── endpoints/
-└── conveniences/          # High-level helpers
+│   ├── tool_definition.rs
+│   ├── tool_trait.rs
+│   ├── tool_registry.rs
+│   └── ...
+├── http/                  # Feature: "http" (default)
+│   ├── mod.rs
+│   ├── client.rs          # OllamaClient struct + retry helpers
+│   ├── api_async.rs       # OllamaApiAsync trait + impl
+│   ├── api_sync.rs        # OllamaApiSync trait + impl
+│   ├── endpoints.rs       # Endpoint constants
+│   └── config.rs          # ClientConfig struct
+└── conveniences/          # Feature: "conveniences"
     └── mod.rs
 ```
 
 ### Documentation Files
 ```
-DEV_NOTES.md               # Development decisions
+README.md                  # Project overview, quick start
 CHANGELOG.md               # Version history
+CONTRIBUTING.md            # How to contribute
+DEV_NOTES.md               # Development decisions
 DECISIONS.md               # Architectural decisions
 BLOCKERS.md                # Pending decisions
 ARCHITECTURE.md            # Module structure
@@ -151,20 +172,20 @@ ARCHITECTURE.md            # Module structure
 ## Quality Standards
 
 ### Code Quality
-- `cargo clippy -- -D warnings` must pass
+- `cargo clippy --all-features -- -D warnings` must pass
 - `cargo fmt --check` must pass
 - All public items documented
 - No unsafe code without justification
 
 ### Test Coverage
-- Unit tests for all public functions
-- Integration tests for HTTP endpoints
+- Unit tests in source files (`#[cfg(test)] mod tests`)
+- Integration tests in `tests/client_{operation}_tests.rs`
 - Example files that compile and run
-- Tests in source files or tests/ folder
+- Feature-gated tests with `#[cfg(feature = "...")]`
 
 ### Documentation
 - README with quick start and examples
-- Rustdoc for all public APIs
+- Rustdoc for all public APIs (use `no_run` on doc examples)
 - CHANGELOG following Keep a Changelog format
 - Architecture documentation for complex modules
 
@@ -179,40 +200,74 @@ When facing implementation choices:
 
 ## Common Patterns
 
-### Builder Pattern
-Use for types with many optional fields:
+### With-Method Chain (preferred over Builder)
 ```rust
-ChatRequest::builder()
-    .model("llama3")
-    .messages(messages)
-    .temperature(0.7)
-    .build()
+ChatRequest::new("llama3", [ChatMessage::user("Hello")])
+    .with_format(FormatSetting::json())
+    .with_options(ModelOptions::default().with_temperature(0.7))
+    .with_think(ThinkSetting::enabled())
 ```
 
 ### Async/Sync Variants
-Provide both variants with clear naming:
+Provide both variants with `_blocking` suffix for sync:
 ```rust
-client.generate(request).await        // async
-client.generate_sync(request)          // sync (blocking)
+client.chat(&request).await          // async (OllamaApiAsync)
+client.chat_blocking(&request)       // sync  (OllamaApiSync)
 ```
 
 ### Error Handling
-Use thiserror for error types:
+Use thiserror with `{Type}Error` suffix on variants:
 ```rust
 #[derive(Debug, thiserror::Error)]
-pub enum OllamaError {
-    #[error("HTTP error: {0}")]
-    Http(#[from] reqwest::Error),
-    #[error("API error: {message}")]
-    Api { message: String },
+pub enum Error {
+    #[error("HTTP request failed: {0}")]
+    HttpError(String),
+    #[error("HTTP status error: {0}")]
+    HttpStatusError(u16),
+    #[error("Request timeout after {0} seconds")]
+    TimeoutError(u64),
+    #[error("Maximum retry attempts ({0}) exceeded")]
+    MaxRetriesExceededError(u32),
+}
+
+// Manual From (avoid exposing external types)
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Self {
+        Error::HttpError(err.to_string())
+    }
 }
 ```
 
-### Response Types
-Use Into/From for flexible conversions:
+### Feature Flags
+Three levels of conditional compilation:
 ```rust
-impl From<RawResponse> for CleanResponse {
-    fn from(raw: RawResponse) -> Self { ... }
+// Module level (lib.rs)
+#[cfg(feature = "model")]
+pub mod model;
+
+// Field level (struct)
+#[cfg(feature = "tools")]
+#[serde(skip_serializing_if = "Option::is_none")]
+pub tools: Option<Vec<ToolDefinition>>,
+
+// Method level (trait)
+#[cfg(feature = "model")]
+async fn list_models(&self) -> Result<ListResponse>;
+```
+
+### Trait-Based API
+```rust
+#[async_trait]
+pub trait OllamaApiAsync: Send + Sync {
+    async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse>;
+    #[cfg(feature = "model")]
+    async fn list_models(&self) -> Result<ListResponse>;
+}
+
+pub trait OllamaApiSync: Send + Sync {
+    fn chat_blocking(&self, request: &ChatRequest) -> Result<ChatResponse>;
+    #[cfg(feature = "model")]
+    fn list_models_blocking(&self) -> Result<ListResponse>;
 }
 ```
 
@@ -223,7 +278,9 @@ impl From<RawResponse> for CleanResponse {
 | `/continue-session` | Load previous context |
 | `/save-session-cache` | Save current context |
 | `/review-changes` | Review uncommitted changes |
-| `/commit` | Create a commit with proper message |
+| `/execute-impl` | Execute implementation instructions |
+| `/update-docs` | Update documentation |
+| `/write-commit-text` | Generate commit message |
 
 ## Iteration Cycle
 
