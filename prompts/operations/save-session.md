@@ -1,74 +1,118 @@
-# Prompt: Save Session
+---
+description: Save session progress by updating memory.md and iteration files
+---
 
-## Context
+# Save Session
 
-Use this prompt at the end of a work session to generate a structured summary that can be used to resume work in the next session. This replaces manual session notes.
+> Use at the end of a work session to persist progress. The AI automatically updates `impl/memory.md` and the active iteration file.
 
-## Prerequisites
+## Instructions
 
-- You've done work during this session that you want to preserve context for
-- AI has context about the work done during this session
+You are helping the developer save their session progress. Your job is to update the project's memory files so the next session can resume seamlessly — whether it's the same developer or someone else.
 
-## Input
+**Your role:**
+- Review what was accomplished in this session
+- Update `impl/memory.md` with current state
+- Update the active iteration file with completed tasks
+- Ensure nothing is lost between sessions
 
-No additional input needed — the AI generates the summary from the current conversation context.
+---
 
-If the AI has lost context, provide a brief reminder of what was done.
+### STEP 1 — Review Session Work
 
-## Prompt
+Ask the developer:
 
-<!-- Copy from here -->
+> "Let me save your session progress. Can you briefly describe what we accomplished today, or should I summarize from our conversation?"
 
-Please generate a session summary so I can resume work next time. Review everything we did in this session and produce a structured summary with the following sections:
-
-**1. Session Overview**
-- Date: [today's date]
-- Duration: [approximate]
-- Phase: [which methodology phase we're in]
-
-**2. Work Completed**
-List everything that was accomplished in this session:
-- Files created, modified, or deleted
-- Features implemented
-- Tests written
-- Documentation updated
+If the developer provides a summary, use it. Otherwise, generate a summary from the conversation context including:
+- Tasks completed
+- Files created or modified
 - Decisions made
+- Issues encountered
 
-**3. Current State**
-Describe the exact state of the work:
-- What is complete and working
-- What is partially done
-- What quality gates have been run (and their results)
+### STEP 2 — Read Current State
 
-**4. Decisions Made**
-List any decisions made during this session with brief rationale:
-- [Decision] — [Why]
+Read the following files:
+- `impl/memory.md` — Current project memory
+- Active iteration file from `impl/history/` (the one marked in-progress)
 
-**5. Open Issues**
-List anything unresolved:
-- Bugs found but not fixed
-- Questions that need answers
-- Blockers that need resolution
+### STEP 3 — Update Iteration File
 
-**6. Next Steps**
-Ordered list of what to do next when resuming:
-1. [First thing to do]
-2. [Second thing to do]
-3. ...
+Open the active iteration file and update it:
 
-**7. Context for Next Session**
-Any additional context the AI will need to pick up where we left off (key file references, important details that might not be obvious from the code alone).
+**Update the checklist:**
+- Mark completed tasks as done (`- [x]`)
+- Add any new tasks that were discovered
+- Note any blockers in the Blockers section
 
-Format the summary as a clean Markdown document that I can save to a file.
+**Add decisions:**
+- Record any decisions made during this session in the Decisions table
 
-<!-- To here -->
+**Update status:**
+- If all acceptance criteria are met, change status to `done`
+- If blocked, change status to `blocked` and note why
 
-## Expected Output
+Show the developer the changes and ask:
+> "Here are the updates to the iteration file. Does this look correct?"
 
-A complete Markdown session summary document ready to be saved.
+Wait for confirmation before saving.
 
-## Next Steps
+### STEP 4 — Update Memory
 
-- Review the summary for accuracy
-- Save it to a file in the project (e.g., `docs/sessions/session-YYYY-MM-DD.md` or wherever the project keeps session notes)
-- Use `prompts/initialization/resume-session.md` with this summary in the next session
+Update `impl/memory.md`:
+
+**Active Work section:**
+- Update the status/description of active work
+- If work was completed, move it to Recent Completions
+
+**Recent Completions section:**
+- Add any completed iterations with today's date
+
+**Key Decisions section:**
+- Add any significant decisions that should persist beyond this iteration
+
+**Constraints & Reminders section:**
+- Add any new constraints or important reminders discovered
+
+Show the developer the changes and ask:
+> "Here are the updates to memory.md. Does this look correct?"
+
+Wait for confirmation before saving.
+
+### STEP 5 — Confirm Save
+
+After updating both files, tell the developer:
+
+> "Session saved. Updated:"
+> - `impl/history/[iteration-file].md` — [brief summary of changes]
+> - `impl/memory.md` — [brief summary of changes]
+>
+> "Next time, use `resume-session.md` or the copy in `impl/resume-session.md` to pick up where you left off."
+
+### STEP 6 — Suggest Commit (Optional)
+
+If there are uncommitted changes, ask:
+
+> "Would you like me to commit these memory updates? Suggested message:"
+> ```
+> chore: save session progress for [iteration name]
+> ```
+
+If yes, stage and commit the impl/ changes.
+
+## Output
+
+After completing the save flow:
+
+1. **Iteration file updated** — Tasks checked off, decisions recorded
+2. **Memory file updated** — Active work, completions, decisions persisted
+3. **Ready for next session** — Any developer can resume with full context
+
+## Quick Save
+
+If the developer just says "save session" without details, do your best to:
+1. Infer what was done from the conversation
+2. Show proposed updates
+3. Ask for confirmation before saving
+
+Keep it fast — the developer wants to wrap up, not answer many questions.

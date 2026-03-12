@@ -153,25 +153,52 @@ Create the memory structure at the project root:
 
 ```
 impl/
-├── memory.md           # Initialize with project summary
+├── memory.md              # Initialize with project summary
 ├── project-definition.md  # Save the approved Project Definition here
-└── history/            # Empty directory for iteration tracking
+├── resume-session.md      # Copy of the resume-session prompt
+├── methodology/           # Copy of the Design Source methodology
+│   ├── overview.md
+│   ├── phases/
+│   │   ├── 01-analyze.md
+│   │   ├── 02-plan.md
+│   │   ├── 03-specify.md
+│   │   ├── 04-implement.md
+│   │   └── 05-verify.md
+│   ├── roles.md
+│   └── decision-framework.md
+└── history/               # Empty directory for iteration tracking
 ```
 
-Create `impl/memory.md` with:
-- Project name and description from Step 1
-- Current status: "Active development"
-- Empty Active Work section
-- Constraints from the Project Definition
-- Empty History Index
+**Create the following:**
+
+1. **`impl/memory.md`** with:
+   - Project name and description from Step 1
+   - Current status: "Active development"
+   - Empty Active Work section
+   - Constraints from the Project Definition
+   - Empty History Index
+
+2. **`impl/project-definition.md`** — Save the approved Project Definition
+
+3. **`impl/resume-session.md`** — Copy from `prompts/initialization/resume-session.md`
+
+4. **`impl/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files. This makes the project self-contained.
+
+5. **`impl/history/`** — Create empty directory for iteration tracking
 
 Tell the developer:
 
-> "I've created the `impl/` folder to track project memory. This will be versioned with your code so any developer or AI assistant can pick up where you left off."
+> "I've created the `impl/` folder with project memory and a copy of the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
 
 **If `impl/` directory already exists:**
 
-Verify the structure is complete. If `memory.md` or `project-definition.md` are missing, create them. Update `memory.md` if the Project Definition was modified during validation.
+Verify the structure is complete. If any of these are missing, create them:
+- `memory.md`
+- `project-definition.md`
+- `resume-session.md`
+- `methodology/` folder
+
+Update `memory.md` if the Project Definition was modified during validation.
 
 ### STEP 5 — Current Task
 
