@@ -11,7 +11,7 @@
 
 - Specification documents (from Phase 3)
 - Implementation plan (if created using `templates/implementation/implementation-plan.md`)
-- Project Profile (`templates/project/project-profile.md`)
+- Project Definition (`templates/project/project-definition.md`)
 
 ## Activities
 
@@ -29,9 +29,9 @@ Follow this sequence for each unit of work:
 
 This order can vary by project type, but the principle is: **build from the inside out** — start with the data, then the logic, then the integration layer.
 
-### 2. Follow the Project Profile
+### 2. Follow the Project Definition
 
-Reference the Project Profile during implementation for:
+Reference the Project Definition during implementation for:
 
 - **Naming conventions** — Variables, functions, files, classes
 - **Code style** — Formatting, indentation, import order
@@ -40,7 +40,7 @@ Reference the Project Profile during implementation for:
 
 ### 3. Write Tests
 
-Testing strategy depends on the project (see Project Profile), but the methodology requires:
+Testing strategy depends on the project (see Project Definition), but the methodology requires:
 
 - **At minimum:** Tests that verify the acceptance criteria from the spec
 - **Recommended:** Tests for edge cases and error scenarios listed in the spec
@@ -76,7 +76,7 @@ If you discover something unexpected:
 
 - [ ] All acceptance criteria from the spec are met
 - [ ] Tests pass (unit, integration, as applicable)
-- [ ] Code follows the Project Profile's conventions
+- [ ] Code follows the Project Definition's conventions
 - [ ] No hardcoded values, secrets, or temporary hacks left in
 - [ ] Commits are clean and incremental
 
@@ -85,7 +85,7 @@ If you discover something unexpected:
 - **Implementing without a spec** — Writing code without knowing what "done" looks like
 - **Big bang commits** — One commit with all changes
 - **Tests as afterthought** — Writing all tests after all code is done
-- **Ignoring conventions** — Deviating from the Project Profile without an ADR
+- **Ignoring conventions** — Deviating from the Project Definition without an ADR
 - **Gold plating** — Adding features or polish not in the specification
 
 ## Next Phase

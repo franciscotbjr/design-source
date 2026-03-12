@@ -1,4 +1,4 @@
-# Project Profile — React Web Application
+# Project Definition — React Web Application
 
 > Pre-filled preset for a React + TypeScript web application. Customize for your project.
 

@@ -1,4 +1,4 @@
-# Project Profile — Node.js + Express API
+# Project Definition — Node.js + Express API
 
 > Pre-filled preset for a Node.js REST API with Express. Customize for your project.
 

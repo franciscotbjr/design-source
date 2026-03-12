@@ -1,4 +1,4 @@
-# Project Profile — Rust Library
+# Project Definition — Rust Library
 
 > Pre-filled preset for a Rust library/crate. Customize for your project.
 

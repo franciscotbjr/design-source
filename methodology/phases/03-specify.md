@@ -10,7 +10,7 @@
 ## Inputs
 
 - Plan output (architecture, milestones, blockers resolved)
-- Project Profile (`templates/project/project-profile.md`)
+- Project Definition (`templates/project/project-definition.md`)
 - Specification templates from `templates/specification/`
 
 ## Activities
@@ -45,7 +45,7 @@ Before moving to implementation, verify:
 - Is the spec **complete enough** to implement without guesswork?
 - Are the **acceptance criteria measurable** and testable?
 - Are **edge cases** and **error scenarios** covered?
-- Does it **align with the Project Profile** conventions?
+- Does it **align with the Project Definition** conventions?
 
 ### 4. Store the Specification
 
@@ -67,7 +67,7 @@ The methodology does not prescribe where specs live — that's a project-level d
 - [ ] Every unit of work in the current milestone has a specification
 - [ ] Each spec has measurable acceptance criteria
 - [ ] Test scenarios cover happy path, edge cases, and error cases
-- [ ] Specs reference the Project Profile's conventions where applicable
+- [ ] Specs reference the Project Definition's conventions where applicable
 - [ ] No implementation ambiguity remains
 
 ## Anti-Patterns
@@ -75,7 +75,7 @@ The methodology does not prescribe where specs live — that's a project-level d
 - **Spec as formality** — Writing a spec after the code is already written
 - **Spec as novel** — Over-specifying trivial work
 - **Missing error cases** — Only specifying the happy path
-- **Detached from conventions** — Ignoring the Project Profile's patterns and naming rules
+- **Detached from conventions** — Ignoring the Project Definition's patterns and naming rules
 
 ## Guidance: When to Skip or Shorten
 

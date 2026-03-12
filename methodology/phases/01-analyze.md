@@ -13,7 +13,7 @@
 
 - Feature request, bug report, or change description
 - Existing codebase (if applicable)
-- Project Profile (`templates/project/project-profile.md`)
+- Project Definition (`templates/project/project-definition.md`)
 
 ## Activities
 

@@ -1,11 +1,11 @@
 # Presets
 
-Pre-filled Project Profiles for common technology stacks. Copy a preset as your starting point instead of filling the Project Profile template from scratch.
+Pre-filled Project Definitions for common technology stacks. Copy a preset as your starting point instead of filling the Project Definition template from scratch.
 
 ## How to Use
 
 1. Find the preset that matches your stack (or is closest to it)
-2. Copy the preset file to your project as your Project Profile
+2. Copy the preset file to your project as your Project Definition
 3. Customize the copied file to match your specific project (name, repo URL, dependencies, etc.)
 4. Use it with the prompts in `prompts/`
 
@@ -23,7 +23,7 @@ Pre-filled Project Profiles for common technology stacks. Copy a preset as your 
 
 If you have a stack that's not covered, contributions are welcome. A good preset should:
 
-1. Follow the same structure as `templates/project/project-profile.md`
+1. Follow the same structure as `templates/project/project-definition.md`
 2. Fill in realistic, production-ready values (not toy examples)
 3. Include the most common quality gates for that stack
 4. Document conventions that are idiomatic for the language/framework

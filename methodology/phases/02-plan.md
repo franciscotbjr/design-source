@@ -10,7 +10,7 @@
 ## Inputs
 
 - Analysis output (requirements, complexity, dependencies, open questions)
-- Project Profile (`templates/project/project-profile.md`)
+- Project Definition (`templates/project/project-definition.md`)
 - Existing codebase architecture (if applicable)
 
 ## Activities
@@ -21,7 +21,7 @@ Define how the work fits into the system:
 
 - **Where does this code live?** — Which modules, packages, directories, or services?
 - **What are the interfaces?** — Public APIs, data contracts, event boundaries
-- **What patterns apply?** — Reference the Project Profile's conventions section
+- **What patterns apply?** — Reference the Project Definition's conventions section
 - **What changes to existing code?** — New files, modified files, deleted files
 
 For significant decisions, use the Architecture Decision Record template (`templates/project/architecture-decision.md`).
@@ -79,7 +79,7 @@ For complex work, identify risks:
 - **Over-planning** — Planning every detail of a simple task
 - **Big bang delivery** — One milestone that delivers everything at once
 - **Ignoring blockers** — Starting implementation with unresolved blockers
-- **Planning without the Project Profile** — Making architecture decisions without referencing the project's conventions
+- **Planning without the Project Definition** — Making architecture decisions without referencing the project's conventions
 
 ## Next Phase
 

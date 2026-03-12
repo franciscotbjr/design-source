@@ -9,15 +9,15 @@ Design Source provides a structured, repeatable process for developing software 
 - **A 5-phase methodology** — Analyze → Plan → Specify → Implement → Verify
 - **LLM-ready prompts** — Copy-paste Markdown prompts that work with any AI (Claude, GPT, Gemini, local models)
 - **Templates** — Fillable templates for project setup, technical specifications, and implementation planning
-- **Presets** — Pre-filled Project Profiles for common tech stacks (Rust, Node.js, Python, React, Go)
+- **Presets** — Pre-filled Project Definitions for common tech stacks (Rust, Node.js, Python, React, Go)
 
 The methodology is **technology-agnostic** — it works for any language, framework, or project type.
 
 ## Quick Start
 
-### 1. Set Up Your Project Profile
+### 1. Set Up Your Project Definition
 
-Copy a preset from [`presets/`](presets/) or fill the template at [`templates/project/project-profile.md`](templates/project/project-profile.md). The Project Profile captures your tech stack, conventions, and quality gates — it's the single source of truth the AI references.
+Copy a preset from [`presets/`](presets/) or fill the template at [`templates/project/project-definition.md`](templates/project/project-definition.md). The Project Definition captures your tech stack, conventions, and quality gates — it's the single source of truth the AI references.
 
 ### 2. Initialize AI Collaboration
 
@@ -66,16 +66,16 @@ design-source/
 │   ├── phase-transitions/# Move between methodology phases
 │   └── operations/       # Common development tasks
 ├── templates/            # User-fillable templates
-│   ├── project/          # Project Profile, Architecture Decision Record
+│   ├── project/          # Project Definition, Architecture Decision Record
 │   ├── specification/    # Feature, endpoint, component, bugfix, refactor specs
 │   └── implementation/   # Implementation plan, test plan
-├── presets/              # Pre-filled Project Profiles for common stacks
+├── presets/              # Pre-filled Project Definitions for common stacks
 └── examples/             # Community-contributed applied examples
 ```
 
 ## Key Concepts
 
-### The Project Profile
+### The Project Definition
 
 A single document that captures everything technology-specific about your project (stack, conventions, quality gates). All prompts reference it, keeping the methodology itself agnostic.
 
@@ -91,7 +91,7 @@ A single document that captures everything technology-specific about your projec
 
 ### Prompts as a Command Palette
 
-Each prompt is a self-contained Markdown file. Copy the prompt section, paste your Project Profile and context, and send to any LLM. No vendor lock-in, no special tooling required.
+Each prompt is a self-contained Markdown file. Copy the prompt section, paste your Project Definition and context, and send to any LLM. No vendor lock-in, no special tooling required.
 
 ## Available Presets
 

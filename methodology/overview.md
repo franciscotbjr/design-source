@@ -16,7 +16,7 @@ Software development with AI assistants works best when both human and AI operat
 1. **Specification before implementation** — Write down what you're building before writing code
 2. **Incremental delivery** — Ship working software in small, verifiable iterations
 3. **Decisions are permanent artifacts** — Record architectural choices with rationale
-4. **The Project Profile is the source of truth** — All technology-specific details live in one place
+4. **The Project Definition is the source of truth** — All technology-specific details live in one place
 5. **Quality gates are non-negotiable** — Every iteration passes the project's defined checks
 6. **AI is a collaborator, not an oracle** — The human owns decisions; the AI accelerates execution
 
@@ -66,14 +66,14 @@ Every unit of work follows 5 phases:
 
 ### For the Human
 
-1. **Fill the Project Profile** — Once per project, describe your tech stack, conventions, and quality gates using the `templates/project/project-profile.md` template (or copy a preset from `presets/`)
-2. **Use prompts to drive the AI** — Copy prompts from the `prompts/` directory and paste them into your AI assistant alongside your Project Profile
+1. **Fill the Project Definition** — Once per project, describe your tech stack, conventions, and quality gates using the `templates/project/project-definition.md` template (or copy a preset from `presets/`)
+2. **Use prompts to drive the AI** — Copy prompts from the `prompts/` directory and paste them into your AI assistant alongside your Project Definition
 3. **Write specs for each work unit** — Use the specification templates in `templates/specification/` to describe what needs to be built
 4. **Follow the phases** — Move through Analyze → Plan → Specify → Implement → Verify for each feature, bugfix, or refactoring
 
 ### For the AI Assistant
 
-1. **Read the Project Profile** — Understand the technology stack, conventions, and constraints
+1. **Read the Project Definition** — Understand the technology stack, conventions, and constraints
 2. **Follow the current phase** — Don't skip ahead; each phase has defined inputs and outputs
 3. **Reference the methodology** — Use the phase guides in `methodology/phases/` to stay on track
 4. **Produce artifacts** — Each phase produces concrete deliverables (specs, plans, code, docs)
@@ -90,6 +90,38 @@ The methodology adapts to work of any size:
 | **Large** (new module, major refactor) | All 5 phases, multiple iterations with sub-tasks |
 | **Project bootstrap** | Use the `new-project` initialization prompt, then iterate |
 
+## Project Memory Structure
+
+Projects using Design Source maintain an `impl/` directory at the project root for tracking state across sessions and developers:
+
+```
+your-project/
+└── impl/
+    ├── memory.md           # Current context — AI reads this first
+    ├── project-definition.md  # Technology stack, conventions, quality gates
+    └── history/
+        ├── 001-feature-x.md
+        ├── 002-bugfix-y.md
+        └── ...
+```
+
+### Why This Matters
+
+- **Multi-developer continuity** — Any developer can onboard an AI assistant by pointing it to `impl/memory.md`
+- **Session persistence** — Work state survives across chat sessions without manual context restoration
+- **Iteration tracking** — Each feature, bugfix, or refactor has its own file with acceptance criteria and task checklists
+- **Version controlled** — The entire `impl/` directory is committed to the repository
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `memory.md` | Current project state, active work, constraints, and history index. The AI's entry point. |
+| `project-definition.md` | Technology stack, conventions, quality gates. The source of truth for how to build. |
+| `history/NNN-name.md` | One file per iteration. Contains description, acceptance criteria, task checklist, decisions. |
+
+The initialization prompts (`new-project.md`, `onboard-existing.md`) automatically create and maintain this structure.
+
 ## Directory Structure
 
 ```
@@ -104,16 +136,16 @@ design-source/
 │   ├── phase-transitions/# Move between phases
 │   └── operations/       # Common tasks (commit, docs, review, etc.)
 ├── templates/            # User-fillable templates
-│   ├── project/          # Project Profile, ADR
+│   ├── project/          # Project Definition, memory template, ADR
 │   ├── specification/    # Feature, endpoint, component, bugfix, refactor specs
-│   └── implementation/   # Implementation plan, test plan
-├── presets/              # Pre-filled Project Profiles for common stacks
+│   └── implementation/   # Implementation plan, test plan, iteration tracking
+├── presets/              # Pre-filled Project Definitions for common stacks
 └── examples/             # Community-contributed applied examples
 ```
 
 ## Getting Started
 
 1. Read the [phase guides](phases/) to understand the workflow
-2. Copy a [preset](../presets/) or fill the [Project Profile template](../templates/project/project-profile.md)
-3. Use the [new-project prompt](../prompts/initialization/new-project.md) to bootstrap your project with an AI assistant
-4. Follow the iteration cycle for each unit of work
+2. Use the [new-project prompt](../prompts/initialization/new-project.md) to bootstrap your project with an AI assistant — it will create the Project Definition and memory structure for you
+3. For existing projects, use the [onboard-existing prompt](../prompts/initialization/onboard-existing.md) to bring an AI up to speed
+4. Follow the iteration cycle for each unit of work, tracking progress in `impl/history/`

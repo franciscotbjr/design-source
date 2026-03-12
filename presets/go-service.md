@@ -1,4 +1,4 @@
-# Project Profile — Go Backend Service
+# Project Definition — Go Backend Service
 
 > Pre-filled preset for a Go backend service. Customize for your project.
 

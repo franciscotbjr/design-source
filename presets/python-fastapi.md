@@ -1,4 +1,4 @@
-# Project Profile — Python + FastAPI
+# Project Definition — Python + FastAPI
 
 > Pre-filled preset for a Python web API with FastAPI. Customize for your project.
 

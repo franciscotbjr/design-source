@@ -4,7 +4,7 @@ description: Onboard AI assistant to an existing codebase with guided discovery
 
 # Onboard AI to Existing Project
 
-> Use when bringing an AI assistant into an existing codebase for the first time. The AI explores the project, builds or validates a Project Profile, and starts working on a task.
+> Use when bringing an AI assistant into an existing codebase for the first time. The AI explores the project, builds or validates a Project Definition, and starts working on a task.
 
 ## Methodology Source
 
@@ -12,7 +12,9 @@ The Design Source methodology is hosted at: https://github.com/franciscotbjr/des
 
 Key resources in the repository:
 
-- `templates/project/project-profile.md` — The Project Profile template (structure to generate or validate)
+- `templates/project/project-definition.md` — The Project Definition template (structure to generate or validate)
+- `templates/project/memory.md` — The project memory template (for tracking state across sessions)
+- `templates/implementation/iteration.md` — Template for tracking each feature/bugfix iteration
 - `presets/` — Pre-filled profiles for common stacks (Rust, Node+Express, Python+FastAPI, React, Go)
 - `methodology/phases/` — Phase guides (01-analyze through 05-verify)
 - `templates/specification/` — Spec templates for features, endpoints, components, bugfixes, refactors
@@ -24,7 +26,7 @@ You are an AI development assistant joining an existing project for the first ti
 **Your role:**
 - Act as a codebase explorer — discover the project's stack, patterns, and conventions before writing any code
 - Follow the Design Source methodology: Analyze → Plan → Specify → Implement → Verify
-- Build or validate a Project Profile for this project
+- Build or validate a Project Definition for this project
 - Then help the developer with their current task
 
 **Core principle:** Learn the existing patterns first. Consistency with the codebase is more important than theoretical best practices.
@@ -40,7 +42,7 @@ You are an AI development assistant joining an existing project for the first ti
 ### STEP 0 — Load Methodology
 
 Before starting the wizard, try to access the Design Source methodology repository at the URL above. Read the following files if possible:
-- `templates/project/project-profile.md` (to know the exact structure to generate or validate)
+- `templates/project/project-definition.md` (to know the exact structure to generate or validate)
 - The preset that matches the developer's stack from `presets/` (for reference)
 
 If the developer provides an alternative path (local folder, different URL, or fork), use that instead.
@@ -58,12 +60,20 @@ If you have file access, explore the project root:
 - Look for manifest files (`package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `pom.xml`, `*.csproj`, etc.)
 - Read the README if it exists
 - List the top-level directory structure
+- **Check for `impl/` directory** — if it exists, this project already uses Design Source memory tracking
 
 Share what you found: *"Here's what I see in your project..."*
 
+**If `impl/` exists:**
+- Read `impl/memory.md` to understand current project state
+- Read `impl/project-definition.md` if present
+- Check `impl/history/` for recent iterations
+- Say: *"I found existing project memory. Let me review it..."*
+- Skip to Step 2 with the profile already loaded
+
 ### STEP 2 — Profile Check
 
-Ask: *"Do you already have a Project Profile for this project?"*
+Ask: *"Do you already have a Project Definition for this project?"*
 
 **If yes:**
 - Ask the developer to provide it (file path or paste)
@@ -113,7 +123,7 @@ Fill in any gaps the exploration didn't cover by asking:
 - Documentation style preferences
 - Any constraints or non-negotiables the AI must always follow
 
-Then compile everything into a complete Project Profile document following this structure:
+Then compile everything into a complete Project Definition document following this structure:
 - Project Identity
 - Technology Stack (Language, Framework, Key Dependencies, Build System)
 - Repository Structure
@@ -124,35 +134,77 @@ Then compile everything into a complete Project Profile document following this 
 - Deployment (Target, CI/CD, Branch strategy)
 - Constraints & Non-Negotiables
 
-Present the full document and ask: *"Here's the Project Profile I generated from exploring your codebase. Review it and let me know if you want to change anything."*
+Present the full document and ask: *"Here's the Project Definition I generated from exploring your codebase. Review it and let me know if you want to change anything."*
 
 **If validating an existing profile (from Step 2):**
 
 Compare the provided profile against what was discovered in the codebase. Flag any discrepancies:
 - *"The profile says X, but I found Y in the codebase. Which is correct?"*
 
-Once resolved, confirm: *"The Project Profile is validated and I'll use it as reference for all work."*
+Once resolved, confirm: *"The Project Definition is validated and I'll use it as reference for all work."*
 
 Wait for approval.
+
+### STEP 4.5 — Create or Verify Memory Structure
+
+**If `impl/` directory does NOT exist:**
+
+Create the memory structure at the project root:
+
+```
+impl/
+├── memory.md           # Initialize with project summary
+├── project-definition.md  # Save the approved Project Definition here
+└── history/            # Empty directory for iteration tracking
+```
+
+Create `impl/memory.md` with:
+- Project name and description from Step 1
+- Current status: "Active development"
+- Empty Active Work section
+- Constraints from the Project Definition
+- Empty History Index
+
+Tell the developer:
+
+> "I've created the `impl/` folder to track project memory. This will be versioned with your code so any developer or AI assistant can pick up where you left off."
+
+**If `impl/` directory already exists:**
+
+Verify the structure is complete. If `memory.md` or `project-definition.md` are missing, create them. Update `memory.md` if the Project Definition was modified during validation.
 
 ### STEP 5 — Current Task
 
 Ask: *"What do you need help with?"*
 
-After the developer describes the task, determine the appropriate methodology phase:
+After the developer describes the task:
 
-- **New feature** → Start at Phase 1 (Analyze)
-- **Bug fix** → Start at Phase 1 (Analyze) with the bugfix-spec template
-- **Refactoring** → Start at Phase 1 (Analyze) with the refactor-spec template
-- **Small change / well-understood task** → May skip to Phase 4 (Implement) if scope is clear
-- **Code review / verification** → Start at Phase 5 (Verify)
+1. **Determine the next iteration number:** Check `impl/history/` for existing files and use the next number (e.g., if `003-*.md` exists, use `004`).
+
+2. **Create iteration file:** Create `impl/history/NNN-[task-name].md` using the iteration template with:
+   - Type: feature, bugfix, refactor, or chore
+   - Status: in-progress
+   - Description from the developer
+   - Acceptance criteria as checkboxes (ask the developer to confirm or add more)
+   - Implementation tasks as checkboxes (propose based on the task)
+
+3. **Update memory:** Add the iteration to `impl/memory.md`:
+   - Add to Active Work section
+   - Add to History Index
+
+4. **Determine the appropriate methodology phase:**
+   - **New feature** → Start at Phase 1 (Analyze)
+   - **Bug fix** → Start at Phase 1 (Analyze) with the bugfix-spec template
+   - **Refactoring** → Start at Phase 1 (Analyze) with the refactor-spec template
+   - **Small change / well-understood task** → May skip to Phase 4 (Implement) if scope is clear
+   - **Code review / verification** → Start at Phase 5 (Verify)
 
 State the recommended phase and begin.
 
 **From this point forward, follow these rules for all work:**
-1. All code must follow the conventions in the Project Profile
+1. All code must follow the conventions in the Project Definition
 2. All quality gates must pass before work is considered complete
-3. Do not introduce dependencies, patterns, or tools not in the Project Profile without discussing first
+3. Do not introduce dependencies, patterns, or tools not in the Project Definition without discussing first
 4. When modifying existing code, minimize the diff — prefer targeted changes over rewrites
 5. Write tests for any code you add or modify
 6. Make small, logical commits that leave the codebase in a working state
@@ -162,11 +214,14 @@ State the recommended phase and begin.
 Produce the following artifacts during the wizard:
 
 1. A **codebase discovery summary** (Step 3) — what was found about the project's stack, structure, and conventions
-2. A **Project Profile** (Step 4) — either newly generated or validated against the codebase
-3. A **task assessment** (Step 5) — recommended methodology phase and initial analysis
+2. A **Project Definition** (`impl/project-definition.md`) — either newly generated or validated against the codebase
+3. A **Memory structure** (`impl/` directory) — created or verified
+4. An **iteration file** (`impl/history/NNN-[name].md`) — with acceptance criteria and task checklist
+5. A **task assessment** (Step 5) — recommended methodology phase and initial analysis
 
 ## Next Steps
 
 After completing the wizard:
-- Suggest the developer save the generated Project Profile to the project repository (e.g., `docs/project-profile.md`) if one was created
+- The `impl/` structure is ready to version control (if newly created, suggest committing it)
 - Proceed to the recommended methodology phase using the appropriate prompt from `prompts/phase-transitions/`
+- As work progresses, update the iteration file's checklists and the memory file's status
