@@ -56,16 +56,37 @@ Ask:
 - What type of project is it? (library, web app, CLI, API service, mobile app, data pipeline, etc.)
 - What license? (propose MIT as default)
 
-### STEP 1.5 — Project Location
+### STEP 1.5 — Detect Existing Structure & Project Location
 
-Check the current working directory. Ask:
+**First, scan the current folder** for existing project indicators:
+- `Cargo.toml` → Rust project
+- `package.json` → Node.js project
+- `pyproject.toml` or `setup.py` → Python project
+- `go.mod` → Go project
+- `.git/` → Git repository initialized
+- `src/`, `lib/`, `cmd/`, `internal/` → Source directories
+- `README.md`, `LICENSE` → Standard files
 
-> "I see you're in [current folder path]. Do you want to use this folder as the project root, or create a new subfolder?"
+**If existing structure is found:**
 
-- **If using current folder:** Confirm and proceed. This is the default.
-- **If creating subfolder:** Ask for the folder name, create it, and use it as the project root.
+Tell the developer what you found:
+> "I found an existing project structure in this folder: [list what was found, e.g., 'Cargo.toml, src/, .git/']"
 
-Do NOT create a nested project structure inside an existing project unless explicitly requested.
+Then ask:
+> "Do you want to configure Design Source for this existing project, or start fresh in a different location?"
+
+- **If configuring existing:** Note what already exists (will skip creating those in Step 8.75). Proceed with the wizard to document the project.
+- **If starting fresh:** Ask for a new folder name, create it, and use it as the project root.
+
+**If no structure is found (empty or near-empty folder):**
+
+Ask:
+> "This folder appears empty. Do you want to use it as the project root?"
+
+- **If yes:** Proceed. The wizard will offer to scaffold the project in Step 8.75.
+- **If no:** Ask for a folder name to create.
+
+**Remember what was detected** — you'll use this information in Step 8.75 to skip scaffolding steps that are already done.
 
 ### STEP 2 — Tech Stack
 
@@ -146,27 +167,105 @@ Present the full document and ask: *"Here's your complete Project Definition. Re
 
 Wait for approval or adjustments.
 
+### STEP 8.75 — Interactive Project Setup
+
+Now that the Project Definition is approved, guide the developer through setting up the actual project. **Ask before doing** — the developer may have already done some of these steps, or may prefer to do them manually.
+
+**Reference what you detected in Step 1.5.** Skip questions for things that already exist.
+
+#### 8.75.1 — Project Structure
+
+If no project manifest was detected in Step 1.5:
+
+Ask:
+> "Should I create the initial project structure for your [language/framework] project?"
+
+If yes, ask:
+> "What command should I run to initialize the project?"
+
+Run the command the developer provides. If they're unsure, suggest the standard initialization command for their stack based on the Project Definition.
+
+If the developer says no, skip — they'll set it up themselves.
+
+#### 8.75.2 — Dependencies
+
+If dependencies were discussed in Step 2:
+
+Ask:
+> "Should I add the dependencies we discussed to your project?"
+
+List the dependencies for confirmation:
+> "Dependencies to add: [list from Step 2]"
+
+If yes, ask:
+> "How should I add them? I can run a command (like your package manager's install command) or edit the manifest file directly. Which do you prefer?"
+
+Follow the developer's preference to add the dependencies.
+
+#### 8.75.3 — Standard Files
+
+Check which standard files are missing and ask:
+
+> "Should I create these missing files?"
+> - README.md (with project name and description)
+> - .gitignore (with language-appropriate defaults)
+> - LICENSE (with the license from Step 1)
+
+Create only the ones the developer approves.
+
+#### 8.75.4 — Initialize Git
+
+If `.git/` was not detected:
+
+> "Should I initialize a git repository? (`git init`)"
+
+If yes, run `git init`.
+
+**Summary:** After completing these sub-steps, summarize what was created:
+> "Project setup complete. Created: [list of files/directories created]"
+
 ### STEP 8.5 — Create Memory Structure
 
-After the Project Definition is approved, create the `impl/` directory structure at the project root:
+Create the `impl/` directory structure at the project root:
 
 ```
 impl/
-├── memory.md           # Initialize with project summary from Step 1
+├── memory.md              # Initialize with project summary from Step 1
 ├── project-definition.md  # Save the approved Project Definition here
-└── history/            # Empty directory for iteration tracking
+├── resume-session.md      # Copy of the resume-session prompt
+├── methodology/           # Copy of the Design Source methodology
+│   ├── overview.md
+│   ├── phases/
+│   │   ├── 01-analyze.md
+│   │   ├── 02-plan.md
+│   │   ├── 03-specify.md
+│   │   ├── 04-implement.md
+│   │   └── 05-verify.md
+│   ├── roles.md
+│   └── decision-framework.md
+└── history/               # Empty directory for iteration tracking
 ```
 
-Create `impl/memory.md` with:
-- Project name and description from Step 1
-- Current status: "Active development"
-- Empty Active Work section
-- Constraints from Step 7
-- Empty History Index
+**Create the following:**
+
+1. **`impl/memory.md`** with:
+   - Project name and description from Step 1
+   - Current status: "Active development"
+   - Empty Active Work section
+   - Constraints from Step 7
+   - Empty History Index
+
+2. **`impl/project-definition.md`** — Save the approved Project Definition
+
+3. **`impl/resume-session.md`** — Copy from `prompts/initialization/resume-session.md`
+
+4. **`impl/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files. This makes the project self-contained.
+
+5. **`impl/history/`** — Create empty directory for iteration tracking
 
 Tell the developer:
 
-> "I've created the `impl/` folder to track project memory. This will be versioned with your code so any developer or AI assistant can pick up where you left off. The Project Definition is saved at `impl/project-definition.md`."
+> "I've created the `impl/` folder with project memory and a copy of the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
 
 ### STEP 9 — First Feature
 
@@ -202,11 +301,13 @@ Once the developer describes their first feature:
 
 Produce the following artifacts during the wizard:
 
-1. **Project memory structure** (`impl/` directory) — created at the project root
-2. **Project Definition** (`impl/project-definition.md`) — generated from the conversation and approved
-3. **Memory file** (`impl/memory.md`) — initialized with project context
-4. **First iteration file** (`impl/history/001-[name].md`) — with acceptance criteria and task checklist
-5. **Analysis of the first feature** — requirements, complexity, dependencies, open questions
+1. **Project scaffolding** (Step 8.75) — project structure, dependencies, standard files (as approved by developer)
+2. **Project memory structure** (`impl/` directory) — created at the project root
+3. **Project Definition** (`impl/project-definition.md`) — generated from the conversation and approved
+4. **Memory file** (`impl/memory.md`) — initialized with project context
+5. **Resume session prompt** (`impl/resume-session.md`) — copied for convenience (if approved)
+6. **First iteration file** (`impl/history/001-[name].md`) — with acceptance criteria and task checklist
+7. **Analysis of the first feature** — requirements, complexity, dependencies, open questions
 
 ## Next Steps
 
