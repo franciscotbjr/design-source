@@ -29,8 +29,8 @@ Read the following files from the project root:
 **Design Source files (required):**
 1. **`impl/memory.md`** — Current project state, active work, constraints, history index
 2. **`impl/project-definition.md`** — Technology stack, conventions, quality gates
-3. **`impl/methodology/`** — Design Source methodology guides (phases, roles, decision framework)
-4. **`impl/history/`** — List files to find any in-progress iterations
+3. **`impl/methodology/`** — **Read every file in this folder and all subfolders.** These files define the Design Source methodology that governs how you must work. Do not skip any file. Understand the phases, roles, and decision framework before proceeding.
+4. **`impl/history/`** — Read all files. Each file represents a past or in-progress iteration. Check the status field to identify which ones are still active.
 
 **Project documentation (if they exist):**
 5. **`README.md`** — Project overview, purpose, usage instructions
