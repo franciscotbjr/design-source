@@ -1,5 +1,7 @@
 # Design Source
 
+**v0.2.0**
+
 A technology-agnostic methodology for building software with AI assistance.
 
 ## What Is This?
