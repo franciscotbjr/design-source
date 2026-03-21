@@ -37,7 +37,7 @@ This makes your project **self-contained** — any AI assistant can pick up wher
 
 ## Operation Prompts
 
-Once set up, these prompts are available in your project at `design-source/operations/`:
+Once set up, these prompts are available in your project — either as native agent commands (e.g., `/resume-session` in Windsurf, Claude Code, etc.) or in `design-source/operations/`:
 
 | Prompt | Purpose |
 |--------|---------|
