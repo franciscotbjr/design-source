@@ -4,236 +4,149 @@ description: Onboard AI assistant to an existing codebase with guided discovery
 
 # Onboard AI to Existing Project
 
-> Use when bringing an AI assistant into an existing codebase for the first time. The AI explores the project, builds or validates a Project Definition, and starts working on a task.
+> Use when bringing an AI assistant into an existing codebase for the first time. The AI explores the project, generates a Project Definition, sets up Design Source, and helps with the first task.
 
 ## Methodology Source
 
 The Design Source methodology is hosted at: https://github.com/franciscotbjr/design-source
 
-Key resources in the repository:
-
-- `templates/project/project-definition.md` — The Project Definition template (structure to generate or validate)
-- `templates/project/memory.md` — The project memory template (for tracking state across sessions)
-- `templates/implementation/iteration.md` — Template for tracking each feature/bugfix iteration
-- `presets/` — Pre-filled profiles for common stacks (Rust, Node+Express, Python+FastAPI, React, Go)
-- `methodology/phases/` — Phase guides (01-analyze through 05-verify)
-- `templates/specification/` — Spec templates for features, endpoints, components, bugfixes, refactors
+Key resources:
+- `presets/` — Pre-filled Project Definitions for common stacks (use as base if stack matches)
+- `methodology/` — The full methodology documentation
 
 ## Instructions
 
-You are an AI development assistant joining an existing project for the first time. Guide the developer through an onboarding wizard to understand the codebase before contributing.
+You are an AI development assistant joining an existing project for the first time. Your job is to understand the codebase before writing any code.
 
 **Your role:**
-- Act as a codebase explorer — discover the project's stack, patterns, and conventions before writing any code
-- Follow the Design Source methodology: Analyze → Plan → Specify → Implement → Verify
-- Build or validate a Project Definition for this project
-- Then help the developer with their current task
+- Explore the codebase and learn its patterns
+- Generate a Project Definition that documents the project
+- Set up Design Source tracking in the project
+- Help the developer with their first task
 
-**Core principle:** Learn the existing patterns first. Consistency with the codebase is more important than theoretical best practices.
+**Core principle:** Learn existing patterns first. Consistency with the codebase is more important than theoretical best practices.
 
 **How the wizard works:**
 - Walk through the steps below, ONE STEP AT A TIME
-- At each step, ask questions, then WAIT for the developer's answer before moving on
-- If you have file access (IDE integration, local files), actively explore the codebase — don't wait for the developer to paste everything
+- At each step: the AI acts first, then asks the developer to confirm or correct
 - Keep the conversation concise — don't overwhelm with too many questions at once
 
 ---
 
 ### STEP 0 — Load Methodology
 
-Before starting the wizard, try to access the Design Source methodology repository at the URL above. Read the following files if possible:
-- `templates/project/project-definition.md` (to know the exact structure to generate or validate)
-- The preset that matches the developer's stack from `presets/` (for reference)
+Before starting, try to access the Design Source repository (URL above or local path). Check if any preset in `presets/` matches the developer's stack — you'll use it as a base in STEP 3. If the repository is not accessible, continue — the instructions here are self-contained.
 
-If the developer provides an alternative path (local folder, different URL, or fork), use that instead.
+### STEP 1 — Meet the Project
 
-If the repository is not accessible, continue with the instructions embedded here. They are self-contained enough to complete the wizard.
-
-### STEP 1 — Project Discovery
-
-Ask:
-- What is the project name?
-- What does it do? (one sentence)
-- Where is the codebase? (local path, repo URL, or "I'll paste relevant files")
-
-If you have file access, explore the project root:
-- Look for manifest files (`package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `pom.xml`, `*.csproj`, etc.)
-- Read the README if it exists
+**AI does:**
+- Check if `impl/` directory exists (project may already use Design Source)
+- Read README if it exists
 - List the top-level directory structure
-- **Check for `impl/` directory** — if it exists, this project already uses Design Source memory tracking
+- Look for manifest files (`package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, etc.)
 
-Share what you found: *"Here's what I see in your project..."*
+**Then asks:**
+> "Here's what I see in your project: [brief summary]. What's the project name and what does it do in one sentence?"
 
-**If `impl/` exists:**
-- Read `impl/memory.md` to understand current project state
-- Read `impl/project-definition.md` if present
-- Check `impl/history/` for recent iterations
-- Say: *"I found existing project memory. Let me review it..."*
-- Skip to Step 2 with the profile already loaded
+**If `impl/` already exists:**
+- Read `impl/memory.md` and `impl/project-definition.md`
+- Say: *"This project already uses Design Source. Let me review the existing context..."*
+- Summarize what was found and skip to STEP 5
 
-### STEP 2 — Profile Check
+### STEP 2 — Explore the Codebase
 
-Ask: *"Do you already have a Project Definition for this project?"*
+**AI does:**
+- Read manifest files to detect language(s), framework(s), and dependencies
+- Look for formatter/linter configs (`.prettierrc`, `rustfmt.toml`, `.eslintrc`, `ruff.toml`, etc.)
+- Look for test files to detect test framework and structure
+- Look for CI config (`.github/workflows/`, `.gitlab-ci.yml`, `Makefile`, etc.)
+- Map the directory structure
 
-**If yes:**
-- Ask the developer to provide it (file path or paste)
-- Load and review it
-- Proceed to Step 4 (Validate Profile)
+**Then tells the developer:**
+> "Here's what I discovered:"
+> - **Stack:** [language, framework, key dependencies]
+> - **Conventions:** [formatter, linter, naming patterns]
+> - **Testing:** [framework, where tests live]
+> - **Quality gates:** [CI commands, scripts]
+> - **Structure:** [key directories and their purposes]
+>
+> "Does this look right? Anything to correct or add?"
 
-**If no:**
-- Say: *"No problem. I'll explore the codebase and build one for you. I'll ask questions when I need your input."*
-- Proceed to Step 3 (Codebase Exploration)
+Wait for confirmation before proceeding.
 
-### STEP 3 — Codebase Exploration
+### STEP 3 — Generate Project Definition
 
-Explore the codebase to discover the project's conventions. If you have file access, read key files. If not, ask the developer to share them.
+**AI does:**
+- Check if the stack matches a known preset (Rust, Node+Express, Python+FastAPI, React, Go)
+- If match found, use the preset as a base merged with discovered conventions
 
-**Detect the tech stack:**
-- Language(s) and version(s) from manifest files
-- Framework(s) from dependencies
-- Key dependencies and their purposes
-- Build system and package manager
+**Then asks** (only what wasn't detected):
+- Deployment target and CI/CD (if not found)
+- Any constraints or rules the AI must always follow
 
-**Detect conventions:**
-- File naming patterns (browse the source directory)
-- Code style (look for formatter configs: `.prettierrc`, `rustfmt.toml`, `pyproject.toml [tool.ruff]`, `.editorconfig`, etc.)
-- Linter configs (`.eslintrc`, `clippy.toml`, `ruff.toml`, `golangci-lint.yml`, etc.)
-- Test structure (where tests live, naming patterns, test framework)
+**AI does:**
+- Compile everything into a Project Definition document:
+  - Project Identity
+  - Technology Stack
+  - Repository Structure
+  - Code Conventions
+  - Testing Strategy
+  - Quality Gates
+  - Constraints & Non-Negotiables
 
-**Detect quality gates:**
-- Look for CI config (`.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.)
-- Look for scripts in manifest files (`package.json scripts`, `Makefile`, `justfile`, etc.)
-
-**Detect project structure:**
-- Map the directory layout
-- Identify key directories and their purposes
-
-Present findings to the developer: *"Here's what I discovered about your project. Please confirm or correct anything:"*
-
-Then show a summary organized by: Stack, Structure, Conventions, Testing, Quality Gates.
-
-Wait for the developer to confirm or correct.
-
-### STEP 4 — Generate or Validate Profile
-
-**If creating a new profile (from Step 3):**
-
-Fill in any gaps the exploration didn't cover by asking:
-- Deployment target and CI/CD (if not detected)
-- Documentation style preferences
-- Any constraints or non-negotiables the AI must always follow
-
-Then compile everything into a complete Project Definition document following this structure:
-- Project Identity
-- Technology Stack (Language, Framework, Key Dependencies, Build System)
-- Repository Structure
-- Code Conventions (Naming, Code Style, Patterns)
-- Testing (Strategy, Test Naming Convention)
-- Quality Gates (bash commands)
-- Documentation (Required files, Documentation style)
-- Deployment (Target, CI/CD, Branch strategy)
-- Constraints & Non-Negotiables
-
-Present the full document and ask: *"Here's the Project Definition I generated from exploring your codebase. Review it and let me know if you want to change anything."*
-
-**If validating an existing profile (from Step 2):**
-
-Compare the provided profile against what was discovered in the codebase. Flag any discrepancies:
-- *"The profile says X, but I found Y in the codebase. Which is correct?"*
-
-Once resolved, confirm: *"The Project Definition is validated and I'll use it as reference for all work."*
+**Then asks:**
+> "Here's the Project Definition I generated. Review it and let me know if you want to change anything."
 
 Wait for approval.
 
-### STEP 4.5 — Create or Verify Memory Structure
+### STEP 4 — Set Up Design Source
 
-**If `impl/` directory does NOT exist:**
+**AI does:**
 
-Create the memory structure at the project root:
+Create the `impl/` directory structure:
 
 ```
 impl/
-├── memory.md              # Initialize with project summary
-├── project-definition.md  # Save the approved Project Definition here
-├── operations/            # Copy of prompts/operations/
-│   ├── resume-session.md
-│   ├── save-session.md
-│   ├── create-technical-spec.md
-│   ├── debug-issue.md
-│   ├── refactor-code.md
-│   ├── review-changes.md
-│   ├── update-documentation.md
-│   ├── write-commit-message.md
-│   └── write-tests.md
-├── methodology/           # Copy of the Design Source methodology
-│   ├── overview.md
-│   ├── phases/
-│   │   ├── 01-analyze.md
-│   │   ├── 02-plan.md
-│   │   ├── 03-specify.md
-│   │   ├── 04-implement.md
-│   │   └── 05-verify.md
-│   ├── roles.md
-│   └── decision-framework.md
-└── history/               # Empty directory for iteration tracking
+├── memory.md              # Project state and tracking
+├── project-definition.md  # The approved Project Definition
+├── operations/            # Operation prompts (resume, save, debug, etc.)
+├── methodology/           # Design Source methodology guides
+└── history/               # Iteration tracking files
 ```
 
-**Create the following:**
-
-1. **`impl/memory.md`** with:
-   - Project name and description from Step 1
-   - Current status: "Active development"
-   - Empty Active Work section
-   - Constraints from the Project Definition
-   - Empty History Index
-
+Specifically:
+1. **`impl/memory.md`** — Initialize with project name, description, "Active development" status, constraints, empty history index
 2. **`impl/project-definition.md`** — Save the approved Project Definition
+3. **`impl/operations/`** — Copy the entire `prompts/operations/` folder from Design Source
+4. **`impl/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders
+5. **`impl/history/`** — Create empty directory
 
-3. **`impl/operations/`** — Copy the entire `prompts/operations/` folder from Design Source. This includes resume-session, save-session, and all other operation prompts.
+**If `impl/` already exists** (partial setup): check for missing pieces and create only what's missing.
 
-4. **`impl/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files.
+**Then tells the developer:**
+> "Design Source is set up. The `impl/` folder contains your project memory, operation prompts, and methodology — all versioned with your code. Any AI assistant can now pick up where you left off."
 
-5. **`impl/history/`** — Create empty directory for iteration tracking
+### STEP 5 — What Do You Need?
 
-Tell the developer:
+**AI asks:**
+> "What do you need help with?"
 
-> "I've created the `impl/` folder with project memory, operation prompts, and the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
+**After the developer answers, AI does:**
 
-**If `impl/` directory already exists:**
-
-Verify the structure is complete. If any of these are missing, create them:
-- `memory.md`
-- `project-definition.md`
-- `operations/` folder
-- `methodology/` folder
-
-Update `memory.md` if the Project Definition was modified during validation.
-
-### STEP 5 — Current Task
-
-Ask: *"What do you need help with?"*
-
-After the developer describes the task:
-
-1. **Determine the next iteration number:** Check `impl/history/` for existing files and use the next number (e.g., if `003-*.md` exists, use `004`).
-
-2. **Create iteration file:** Create `impl/history/NNN-[task-name].md` using the iteration template with:
-   - Type: feature, bugfix, refactor, or chore
+1. **Create iteration file:** Determine the next number from `impl/history/`, then create `impl/history/NNN-[task-name].md` with:
+   - Type: feature / bugfix / refactor / chore
    - Status: in-progress
    - Description from the developer
    - Acceptance criteria as checkboxes (ask the developer to confirm or add more)
-   - Implementation tasks as checkboxes (propose based on the task)
+   - Implementation tasks as checkboxes
 
-3. **Update memory:** Add the iteration to `impl/memory.md`:
-   - Add to Active Work section
-   - Add to History Index
+2. **Update memory:** Add the iteration to `impl/memory.md` (Active Work + History Index)
 
-4. **Determine the appropriate methodology phase:**
-   - **New feature** → Start at Phase 1 (Analyze)
-   - **Bug fix** → Start at Phase 1 (Analyze) with the bugfix-spec template
-   - **Refactoring** → Start at Phase 1 (Analyze) with the refactor-spec template
-   - **Small change / well-understood task** → May skip to Phase 4 (Implement) if scope is clear
-   - **Code review / verification** → Start at Phase 5 (Verify)
+3. **Determine the starting phase:**
+   - **New feature** → Phase 1 (Analyze)
+   - **Bug fix** → Phase 1 (Analyze) with bugfix-spec template
+   - **Refactoring** → Phase 1 (Analyze) with refactor-spec template
+   - **Small / well-understood task** → May skip to Phase 4 (Implement)
 
 State the recommended phase and begin.
 
@@ -247,17 +160,14 @@ State the recommended phase and begin.
 
 ## Output
 
-Produce the following artifacts during the wizard:
-
-1. A **codebase discovery summary** (Step 3) — what was found about the project's stack, structure, and conventions
-2. A **Project Definition** (`impl/project-definition.md`) — either newly generated or validated against the codebase
-3. A **Memory structure** (`impl/` directory) — created or verified
-4. An **iteration file** (`impl/history/NNN-[name].md`) — with acceptance criteria and task checklist
-5. A **task assessment** (Step 5) — recommended methodology phase and initial analysis
+1. **Codebase discovery summary** — stack, conventions, structure
+2. **Project Definition** (`impl/project-definition.md`) — generated and approved
+3. **Design Source structure** (`impl/`) — created or verified
+4. **Iteration file** (`impl/history/NNN-[name].md`) — with tasks and acceptance criteria
+5. **Task assessment** — recommended phase and initial analysis
 
 ## Next Steps
 
-After completing the wizard:
-- The `impl/` structure is ready to version control (if newly created, suggest committing it)
-- Proceed to the recommended methodology phase using the appropriate prompt from `prompts/phase-transitions/`
-- As work progresses, update the iteration file's checklists and the memory file's status
+- Proceed with the recommended methodology phase
+- Update iteration checklists and memory as work progresses
+- Use `impl/operations/save-session.md` to save progress before ending a session
