@@ -226,10 +226,10 @@ If yes, run `git init`.
 
 ### STEP 8.5 — Create Memory Structure
 
-Create the `impl/` directory structure at the project root:
+Create the `design-source/` directory structure at the project root:
 
 ```
-impl/
+design-source/
 ├── memory.md              # Initialize with project summary from Step 1
 ├── project-definition.md  # Save the approved Project Definition here
 ├── operations/            # Copy of prompts/operations/
@@ -257,24 +257,110 @@ impl/
 
 **Create the following:**
 
-1. **`impl/memory.md`** with:
+1. **`design-source/memory.md`** with:
    - Project name and description from Step 1
    - Current status: "Active development"
    - Empty Active Work section
    - Constraints from Step 7
    - Empty History Index
 
-2. **`impl/project-definition.md`** — Save the approved Project Definition
+2. **`design-source/project-definition.md`** — Save the approved Project Definition
 
-3. **`impl/operations/`** — Copy the entire `prompts/operations/` folder from Design Source. This includes resume-session, save-session, and all other operation prompts.
+3. **`design-source/operations/`** — Copy the entire `prompts/operations/` folder from Design Source. This includes resume-session, save-session, and all other operation prompts.
 
-4. **`impl/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files.
+4. **`design-source/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files.
 
-5. **`impl/history/`** — Create empty directory for iteration tracking
+5. **`design-source/history/`** — Create empty directory for iteration tracking
 
 Tell the developer:
 
-> "I've created the `impl/` folder with project memory, operation prompts, and the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
+> "I've created the `design-source/` folder with project memory, operation prompts, and the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
+
+### STEP 8.6 — Detect Code Agent
+
+**AI does (silently, before asking the user):**
+
+1. **Self-identify:** Determine which Code Agent you are by introspecting your own identity and system context. Every AI coding agent knows who it is:
+   - If you are **Claude** running inside **Claude Code** → you are Claude Code
+   - If you are **Cascade** running inside **Windsurf** → you are Windsurf
+   - If you are running inside **Cursor** → you are Cursor
+   - If you are **Codex** (OpenAI) → you are Codex
+   - If you are **Gemini** running inside **Antigravity** → you are Antigravity
+   - If you are running inside **OpenCode** → you are OpenCode
+
+2. **Fallback — folder detection (only if self-identification is uncertain):**
+   Check the project root for agent configuration directories:
+   - `.claude/` → Claude Code
+   - `.windsurf/` → Windsurf
+   - `.cursor/` → Cursor
+   - `.codex/` → Codex
+   - `.antigravity/` → Antigravity
+   - `.opencode/` → OpenCode
+
+**Then always ask the developer to confirm:**
+
+> "I'm running as **[Agent Name]**. Would you like me to set up Design Source prompts as native [Agent] commands? This lets you invoke them directly (e.g., `/resume-session`) instead of referencing files manually."
+>
+> 1. **Yes, use [Agent Name]**
+> 2. **Use a different agent** — I'll show you the supported list
+> 3. **Skip** — only use `design-source/operations/`
+
+**If the developer picks "Use a different agent"**, show:
+> - Claude Code
+> - Windsurf
+> - Cursor
+> - Codex
+> - Antigravity
+> - OpenCode
+
+**If the developer says yes (or picks an agent):**
+
+Create agent-native commands for each operation prompt in `design-source/operations/`. Adapt the format to match the agent's conventions:
+
+**Claude Code** — For each prompt, create `.claude/skills/<name>/SKILL.md`:
+```yaml
+---
+name: <prompt-name>
+description: <one-line description from the prompt>
+---
+<prompt content>
+```
+
+**Windsurf** — For each prompt, create `.windsurf/workflows/<name>.md`:
+```yaml
+---
+description: <one-line description from the prompt>
+---
+<prompt content>
+```
+
+**Cursor** — Create `.cursor/rules/design-source.mdc` with:
+```yaml
+---
+description: "Design Source methodology — invoke with @design-source"
+alwaysApply: false
+---
+<reference to design-source/methodology/ and design-source/operations/>
+```
+Also create an `AGENTS.md` at project root referencing the Design Source methodology and operations.
+
+**Codex** — Create `AGENTS.md` at project root with Design Source methodology instructions. Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
+
+**Antigravity** — Create `.antigravity/rules.md` with Design Source conventions and methodology references. Create workflow files in `.antigravity/workflows/` for each operation prompt.
+
+**OpenCode** — For each prompt, create `.opencode/commands/<name>.md`:
+```yaml
+---
+description: <one-line description from the prompt>
+---
+<prompt content>
+```
+
+**Then tells the developer:**
+> "I've set up Design Source as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly. The `design-source/operations/` folder is kept as a portable backup."
+
+**If the developer says no or skips:**
+> "No problem. You can always reference prompts from `design-source/operations/` directly."
 
 ### STEP 9 — First Feature
 
@@ -282,14 +368,14 @@ Ask: *"What do you want to build first?"*
 
 Once the developer describes their first feature:
 
-1. **Create iteration file:** Create `impl/history/001-[feature-name].md` using the iteration template with:
+1. **Create iteration file:** Create `design-source/history/001-[feature-name].md` using the iteration template with:
    - Type: feature (or bugfix/refactor as appropriate)
    - Status: in-progress
    - Description from the developer
    - Acceptance criteria as checkboxes (ask the developer to confirm or add more)
    - Implementation tasks as checkboxes (propose based on the feature)
 
-2. **Update memory:** Add the iteration to `impl/memory.md`:
+2. **Update memory:** Add the iteration to `design-source/memory.md`:
    - Add to Active Work section
    - Add to History Index
 
@@ -311,17 +397,18 @@ Once the developer describes their first feature:
 Produce the following artifacts during the wizard:
 
 1. **Project scaffolding** (Step 8.75) — project structure, dependencies, standard files (as approved by developer)
-2. **Project memory structure** (`impl/` directory) — created at the project root
-3. **Project Definition** (`impl/project-definition.md`) — generated from the conversation and approved
-4. **Memory file** (`impl/memory.md`) — initialized with project context
-5. **Operation prompts** (`impl/operations/`) — all operation prompts including resume-session and save-session
-6. **First iteration file** (`impl/history/001-[name].md`) — with acceptance criteria and task checklist
-7. **Analysis of the first feature** — requirements, complexity, dependencies, open questions
+2. **Project memory structure** (`design-source/` directory) — created at the project root
+3. **Project Definition** (`design-source/project-definition.md`) — generated from the conversation and approved
+4. **Memory file** (`design-source/memory.md`) — initialized with project context
+5. **Operation prompts** (`design-source/operations/`) — all operation prompts including resume-session and save-session
+6. **Agent-native commands** (Step 8.6) — operation prompts adapted to the developer's Code Agent format (if accepted)
+7. **First iteration file** (`design-source/history/001-[name].md`) — with acceptance criteria and task checklist
+8. **Analysis of the first feature** — requirements, complexity, dependencies, open questions
 
 ## Next Steps
 
 After completing the wizard:
-- The `impl/` structure is already created and ready to version control
+- The `design-source/` structure is already created and ready to version control
 - If there are open questions about the first feature, resolve them before proceeding
 - Advance to Phase 2 (Plan) — refer to `methodology/phases/02-plan.md` or `prompts/phase-transitions/start-planning.md`
 - As work progresses, update the iteration file's checklists and the memory file's status

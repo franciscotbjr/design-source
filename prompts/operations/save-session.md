@@ -4,7 +4,7 @@ description: Save session progress by updating memory.md and iteration files
 
 # Save Session
 
-> Use at the end of a work session to persist progress. The AI automatically updates `impl/memory.md` and the active iteration file.
+> Use at the end of a work session to persist progress. The AI automatically updates `design-source/memory.md` and the active iteration file.
 
 ## Instructions
 
@@ -12,7 +12,7 @@ You are helping the developer save their session progress. Your job is to update
 
 **Your role:**
 - Review what was accomplished in this session
-- Update `impl/memory.md` with current state
+- Update `design-source/memory.md` with current state
 - Update the active iteration file with completed tasks
 - Ensure nothing is lost between sessions
 
@@ -33,8 +33,8 @@ If the developer provides a summary, use it. Otherwise, generate a summary from 
 ### STEP 2 — Read Current State
 
 Read the following files:
-- `impl/memory.md` — Current project memory
-- Active iteration file from `impl/history/` (the one marked in-progress)
+- `design-source/memory.md` — Current project memory
+- Active iteration file from `design-source/history/` (the one marked in-progress)
 
 ### STEP 3 — Update Iteration File
 
@@ -59,7 +59,7 @@ Wait for confirmation before saving.
 
 ### STEP 4 — Update Memory
 
-Update `impl/memory.md`:
+Update `design-source/memory.md`:
 
 **Active Work section:**
 - Update the status/description of active work
@@ -84,10 +84,10 @@ Wait for confirmation before saving.
 After updating both files, tell the developer:
 
 > "Session saved. Updated:"
-> - `impl/history/[iteration-file].md` — [brief summary of changes]
-> - `impl/memory.md` — [brief summary of changes]
+> - `design-source/history/[iteration-file].md` — [brief summary of changes]
+> - `design-source/memory.md` — [brief summary of changes]
 >
-> "Next time, use `impl/operations/resume-session.md` to pick up where you left off."
+> "Next time, use `design-source/operations/resume-session.md` to pick up where you left off."
 
 ### STEP 6 — Suggest Commit (Optional)
 
@@ -98,7 +98,7 @@ If there are uncommitted changes, ask:
 > chore: save session progress for [iteration name]
 > ```
 
-If yes, stage and commit the impl/ changes.
+If yes, stage and commit the design-source/ changes.
 
 ## Output
 
