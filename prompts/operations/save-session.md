@@ -87,7 +87,7 @@ After updating both files, tell the developer:
 > - `design-source/history/[iteration-file].md` — [brief summary of changes]
 > - `design-source/memory.md` — [brief summary of changes]
 >
-> "Next time, use `design-source/operations/resume-session.md` to pick up where you left off."
+> "Next time, use `/resume-session` (or `design-source/operations/resume-session.md` if native commands aren't set up) to pick up where you left off."
 
 ### STEP 6 — Suggest Commit (Optional)
 

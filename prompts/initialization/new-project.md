@@ -224,59 +224,7 @@ If yes, run `git init`.
 **Summary:** After completing these sub-steps, summarize what was created:
 > "Project setup complete. Created: [list of files/directories created]"
 
-### STEP 8.5 — Create Memory Structure
-
-Create the `design-source/` directory structure at the project root:
-
-```
-design-source/
-├── memory.md              # Initialize with project summary from Step 1
-├── project-definition.md  # Save the approved Project Definition here
-├── operations/            # Copy of prompts/operations/
-│   ├── resume-session.md
-│   ├── save-session.md
-│   ├── create-technical-spec.md
-│   ├── debug-issue.md
-│   ├── refactor-code.md
-│   ├── review-changes.md
-│   ├── update-documentation.md
-│   ├── write-commit-message.md
-│   └── write-tests.md
-├── methodology/           # Copy of the Design Source methodology
-│   ├── overview.md
-│   ├── phases/
-│   │   ├── 01-analyze.md
-│   │   ├── 02-plan.md
-│   │   ├── 03-specify.md
-│   │   ├── 04-implement.md
-│   │   └── 05-verify.md
-│   ├── roles.md
-│   └── decision-framework.md
-└── history/               # Empty directory for iteration tracking
-```
-
-**Create the following:**
-
-1. **`design-source/memory.md`** with:
-   - Project name and description from Step 1
-   - Current status: "Active development"
-   - Empty Active Work section
-   - Constraints from Step 7
-   - Empty History Index
-
-2. **`design-source/project-definition.md`** — Save the approved Project Definition
-
-3. **`design-source/operations/`** — Copy the entire `prompts/operations/` folder from Design Source. This includes resume-session, save-session, and all other operation prompts.
-
-4. **`design-source/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files.
-
-5. **`design-source/history/`** — Create empty directory for iteration tracking
-
-Tell the developer:
-
-> "I've created the `design-source/` folder with project memory, operation prompts, and the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
-
-### STEP 8.6 — Detect Code Agent
+### STEP 8.5 — Detect Code Agent
 
 **AI does (silently, before asking the user):**
 
@@ -303,7 +251,7 @@ Tell the developer:
 >
 > 1. **Yes, use [Agent Name]**
 > 2. **Use a different agent** — I'll show you the supported list
-> 3. **Skip** — only use `design-source/operations/`
+> 3. **Skip** — use `design-source/operations/` instead
 
 **If the developer picks "Use a different agent"**, show:
 > - Claude Code
@@ -313,18 +261,36 @@ Tell the developer:
 > - Antigravity
 > - OpenCode
 
-**If the developer says yes (or picks an agent):**
+Record the developer's choice — it determines how files are placed in the next step.
 
-Create agent-native commands for each operation prompt in `design-source/operations/`. Adapt the format to match the agent's conventions:
+### STEP 8.6 — Create Memory Structure
 
-**Claude Code** — For each prompt, create `.claude/skills/<name>/SKILL.md`:
-```yaml
----
-name: <prompt-name>
-description: <one-line description from the prompt>
----
+Create the `design-source/` directory structure at the project root. The operation prompts placement depends on the agent choice from STEP 8.5:
+
+**Always create:**
+
+1. **`design-source/memory.md`** with:
+   - Project name and description from Step 1
+   - Current status: "Active development"
+   - Empty Active Work section
+   - Constraints from Step 7
+   - Empty History Index
+
+2. **`design-source/project-definition.md`** — Save the approved Project Definition
+
+3. **`design-source/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files.
+
+4. **`design-source/history/`** — Create empty directory for iteration tracking
+
+**If the developer accepted native commands (STEP 8.5):**
+
+Create agent-native commands for each operation prompt from the Design Source `prompts/operations/` folder. Adapt the format to match the agent's conventions:
+
+**Claude Code** — For each prompt, create `.claude/commands/<name>.md`:
+```markdown
 <prompt content>
 ```
+Simple markdown files. Each filename becomes a `/project:<name>` slash command.
 
 **Windsurf** — For each prompt, create `.windsurf/workflows/<name>.md`:
 ```yaml
@@ -340,7 +306,7 @@ description: <one-line description from the prompt>
 description: "Design Source methodology — invoke with @design-source"
 alwaysApply: false
 ---
-<reference to design-source/methodology/ and design-source/operations/>
+<reference to design-source/methodology/>
 ```
 Also create an `AGENTS.md` at project root referencing the Design Source methodology and operations.
 
@@ -356,11 +322,21 @@ description: <one-line description from the prompt>
 <prompt content>
 ```
 
-**Then tells the developer:**
-> "I've set up Design Source as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly. The `design-source/operations/` folder is kept as a portable backup."
+Do **NOT** create `design-source/operations/` — the prompts already live in the agent's native location.
 
-**If the developer says no or skips:**
-> "No problem. You can always reference prompts from `design-source/operations/` directly."
+Tell the developer:
+
+> "I've created the `design-source/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly."
+
+**If the developer skipped native commands (STEP 8.5):**
+
+Also create:
+
+5. **`design-source/operations/`** — Copy the entire `prompts/operations/` folder from Design Source. This includes resume-session, save-session, and all other operation prompts.
+
+Tell the developer:
+
+> "I've created the `design-source/` folder with project memory, operation prompts, and the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
 
 ### STEP 9 — First Feature
 
@@ -397,11 +373,11 @@ Once the developer describes their first feature:
 Produce the following artifacts during the wizard:
 
 1. **Project scaffolding** (Step 8.75) — project structure, dependencies, standard files (as approved by developer)
-2. **Project memory structure** (`design-source/` directory) — created at the project root
-3. **Project Definition** (`design-source/project-definition.md`) — generated from the conversation and approved
-4. **Memory file** (`design-source/memory.md`) — initialized with project context
-5. **Operation prompts** (`design-source/operations/`) — all operation prompts including resume-session and save-session
-6. **Agent-native commands** (Step 8.6) — operation prompts adapted to the developer's Code Agent format (if accepted)
+2. **Agent detection** (Step 8.5) — Code Agent identified and confirmed by developer
+3. **Project memory structure** (`design-source/` directory) — created at the project root
+4. **Project Definition** (`design-source/project-definition.md`) — generated from the conversation and approved
+5. **Memory file** (`design-source/memory.md`) — initialized with project context
+6. **Operation prompts** — placed as native agent commands (if accepted) or in `design-source/operations/` (if skipped)
 7. **First iteration file** (`design-source/history/001-[name].md`) — with acceptance criteria and task checklist
 8. **Analysis of the first feature** — requirements, complexity, dependencies, open questions
 
