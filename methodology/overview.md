@@ -92,11 +92,11 @@ The methodology adapts to work of any size:
 
 ## Project Memory Structure
 
-Projects using Design Source maintain an `impl/` directory at the project root for tracking state across sessions and developers:
+Projects using Design Source maintain a `design-source/` directory at the project root for tracking state across sessions and developers:
 
 ```
 your-project/
-└── impl/
+└── design-source/
     ├── memory.md           # Current context — AI reads this first
     ├── project-definition.md  # Technology stack, conventions, quality gates
     └── history/
@@ -107,10 +107,10 @@ your-project/
 
 ### Why This Matters
 
-- **Multi-developer continuity** — Any developer can onboard an AI assistant by pointing it to `impl/memory.md`
+- **Multi-developer continuity** — Any developer can onboard an AI assistant by pointing it to `design-source/memory.md`
 - **Session persistence** — Work state survives across chat sessions without manual context restoration
 - **Iteration tracking** — Each feature, bugfix, or refactor has its own file with acceptance criteria and task checklists
-- **Version controlled** — The entire `impl/` directory is committed to the repository
+- **Version controlled** — The entire `design-source/` directory is committed to the repository
 
 ### Key Files
 
@@ -148,4 +148,4 @@ design-source/
 1. Read the [phase guides](phases/) to understand the workflow
 2. Use the [new-project prompt](../prompts/initialization/new-project.md) to bootstrap your project with an AI assistant — it will create the Project Definition and memory structure for you
 3. For existing projects, use the [onboard-existing prompt](../prompts/initialization/onboard-existing.md) to bring an AI up to speed
-4. Follow the iteration cycle for each unit of work, tracking progress in `impl/history/`
+4. Follow the iteration cycle for each unit of work, tracking progress in `design-source/history/`

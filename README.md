@@ -27,7 +27,7 @@ Design Source gives your AI assistant a structured process to follow:
 Analyze → Plan → Specify → Implement → Verify
 ```
 
-When you initialize a project, the AI creates an `impl/` folder in your project with:
+When you initialize a project, the AI creates a `design-source/` folder in your project with:
 - **Project Definition** — Your tech stack, conventions, and quality gates
 - **Memory** — What's in progress, what was decided, what's next
 - **Methodology** — The full process the AI follows
@@ -37,7 +37,7 @@ This makes your project **self-contained** — any AI assistant can pick up wher
 
 ## Operation Prompts
 
-Once set up, these prompts are available in your project at `impl/operations/`:
+Once set up, these prompts are available in your project at `design-source/operations/`:
 
 | Prompt | Purpose |
 |--------|---------|

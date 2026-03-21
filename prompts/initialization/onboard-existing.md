@@ -40,7 +40,7 @@ Before starting, try to access the Design Source repository (URL above or local 
 ### STEP 1 — Meet the Project
 
 **AI does:**
-- Check if `impl/` directory exists (project may already use Design Source)
+- Check if `design-source/` directory exists (project may already use Design Source)
 - Read README if it exists
 - List the top-level directory structure
 - Look for manifest files (`package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, etc.)
@@ -48,8 +48,8 @@ Before starting, try to access the Design Source repository (URL above or local 
 **Then asks:**
 > "Here's what I see in your project: [brief summary]. What's the project name and what does it do in one sentence?"
 
-**If `impl/` already exists:**
-- Read `impl/memory.md` and `impl/project-definition.md`
+**If `design-source/` already exists:**
+- Read `design-source/memory.md` and `design-source/project-definition.md`
 - Say: *"This project already uses Design Source. Let me review the existing context..."*
 - Summarize what was found and skip to STEP 5
 
@@ -103,10 +103,10 @@ Wait for approval.
 
 **AI does:**
 
-Create the `impl/` directory structure:
+Create the `design-source/` directory structure:
 
 ```
-impl/
+design-source/
 ├── memory.md              # Project state and tracking
 ├── project-definition.md  # The approved Project Definition
 ├── operations/            # Operation prompts (resume, save, debug, etc.)
@@ -115,16 +115,16 @@ impl/
 ```
 
 Specifically:
-1. **`impl/memory.md`** — Initialize with project name, description, "Active development" status, constraints, empty history index
-2. **`impl/project-definition.md`** — Save the approved Project Definition
-3. **`impl/operations/`** — Copy the entire `prompts/operations/` folder from Design Source
-4. **`impl/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders
-5. **`impl/history/`** — Create empty directory
+1. **`design-source/memory.md`** — Initialize with project name, description, "Active development" status, constraints, empty history index
+2. **`design-source/project-definition.md`** — Save the approved Project Definition
+3. **`design-source/operations/`** — Copy the entire `prompts/operations/` folder from Design Source
+4. **`design-source/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders
+5. **`design-source/history/`** — Create empty directory
 
-**If `impl/` already exists** (partial setup): check for missing pieces and create only what's missing.
+**If `design-source/` already exists** (partial setup): check for missing pieces and create only what's missing.
 
 **Then tells the developer:**
-> "Design Source is set up. The `impl/` folder contains your project memory, operation prompts, and methodology — all versioned with your code. Any AI assistant can now pick up where you left off."
+> "Design Source is set up. The `design-source/` folder contains your project memory, operation prompts, and methodology — all versioned with your code. Any AI assistant can now pick up where you left off."
 
 ### STEP 4.5 — Detect Code Agent
 
@@ -153,7 +153,7 @@ Specifically:
 >
 > 1. **Yes, use [Agent Name]**
 > 2. **Use a different agent** — I'll show you the supported list
-> 3. **Skip** — only use `impl/operations/`
+> 3. **Skip** — only use `design-source/operations/`
 
 **If the developer picks "Use a different agent"**, show:
 > - Claude Code
@@ -165,7 +165,7 @@ Specifically:
 
 **If the developer says yes (or picks an agent):**
 
-Create agent-native commands for each operation prompt in `impl/operations/`. Adapt the format to match the agent's conventions:
+Create agent-native commands for each operation prompt in `design-source/operations/`. Adapt the format to match the agent's conventions:
 
 **Claude Code** — For each prompt, create `.claude/skills/<name>/SKILL.md`:
 ```yaml
@@ -190,7 +190,7 @@ description: <one-line description from the prompt>
 description: "Design Source methodology — invoke with @design-source"
 alwaysApply: false
 ---
-<reference to impl/methodology/ and impl/operations/>
+<reference to design-source/methodology/ and design-source/operations/>
 ```
 Also create an `AGENTS.md` at project root referencing the Design Source methodology and operations.
 
@@ -207,10 +207,10 @@ description: <one-line description from the prompt>
 ```
 
 **Then tells the developer:**
-> "I've set up Design Source as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly. The `impl/operations/` folder is kept as a portable backup."
+> "I've set up Design Source as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly. The `design-source/operations/` folder is kept as a portable backup."
 
 **If the developer says no or skips:**
-> "No problem. You can always reference prompts from `impl/operations/` directly."
+> "No problem. You can always reference prompts from `design-source/operations/` directly."
 
 ### STEP 5 — What Do You Need?
 
@@ -219,14 +219,14 @@ description: <one-line description from the prompt>
 
 **After the developer answers, AI does:**
 
-1. **Create iteration file:** Determine the next number from `impl/history/`, then create `impl/history/NNN-[task-name].md` with:
+1. **Create iteration file:** Determine the next number from `design-source/history/`, then create `design-source/history/NNN-[task-name].md` with:
    - Type: feature / bugfix / refactor / chore
    - Status: in-progress
    - Description from the developer
    - Acceptance criteria as checkboxes (ask the developer to confirm or add more)
    - Implementation tasks as checkboxes
 
-2. **Update memory:** Add the iteration to `impl/memory.md` (Active Work + History Index)
+2. **Update memory:** Add the iteration to `design-source/memory.md` (Active Work + History Index)
 
 3. **Determine the starting phase:**
    - **New feature** → Phase 1 (Analyze)
@@ -247,14 +247,14 @@ State the recommended phase and begin.
 ## Output
 
 1. **Codebase discovery summary** — stack, conventions, structure
-2. **Project Definition** (`impl/project-definition.md`) — generated and approved
-3. **Design Source structure** (`impl/`) — created or verified
+2. **Project Definition** (`design-source/project-definition.md`) — generated and approved
+3. **Design Source structure** (`design-source/`) — created or verified
 4. **Agent-native commands** (Step 4.5) — operation prompts adapted to the developer's Code Agent format (if accepted)
-5. **Iteration file** (`impl/history/NNN-[name].md`) — with tasks and acceptance criteria
+5. **Iteration file** (`design-source/history/NNN-[name].md`) — with tasks and acceptance criteria
 6. **Task assessment** — recommended phase and initial analysis
 
 ## Next Steps
 
 - Proceed with the recommended methodology phase
 - Update iteration checklists and memory as work progresses
-- Use `impl/operations/save-session.md` to save progress before ending a session
+- Use `design-source/operations/save-session.md` to save progress before ending a session
