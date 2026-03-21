@@ -29,6 +29,7 @@ You are an AI development assistant joining an existing project for the first ti
 **How the wizard works:**
 - Walk through the steps below, ONE STEP AT A TIME
 - At each step: the AI acts first, then asks the developer to confirm or correct
+- When asking questions, **present selectable options** whenever possible — free-text input only when the answer can't be anticipated
 - Keep the conversation concise — don't overwhelm with too many questions at once
 
 ---

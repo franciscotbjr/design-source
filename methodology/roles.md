@@ -82,6 +82,7 @@ The AI assistant should **NOT**:
 - Reference specific files, functions, and line numbers
 - Provide rationale for non-obvious choices
 - State assumptions explicitly
+- Present selectable options (numbered or bulleted choices) when asking questions — only use open-ended free-text input when the answer cannot be anticipated (e.g., project name, description)
 
 ### AI Should Not
 
