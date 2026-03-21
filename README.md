@@ -1,101 +1,59 @@
 # Design Source
 
-**v0.2.0**
+**v0.2.0** — A methodology for building software with AI assistance.
 
-A technology-agnostic methodology for building software with AI assistance.
+## Get Started
 
-## What Is This?
+Pick one file below and give it to your AI assistant. You can do this by:
+- **Copy & paste** the file content into your AI chat, or
+- **Point your AI** to the file URL on GitHub, or
+- **Reference the local file** if you cloned this repository
 
-Design Source provides a structured, repeatable process for developing software with AI coding assistants. It includes:
+| Your situation | Give your AI this file |
+|---|---|
+| **Starting a new project** | [`prompts/initialization/new-project.md`](prompts/initialization/new-project.md) |
+| **Adding AI to an existing project** | [`prompts/initialization/onboard-existing.md`](prompts/initialization/onboard-existing.md) |
+| **Resuming previous work** | [`prompts/operations/resume-session.md`](prompts/operations/resume-session.md) |
 
-- **A 5-phase methodology** — Analyze → Plan → Specify → Implement → Verify
-- **LLM-ready prompts** — Copy-paste Markdown prompts that work with any AI (Claude, GPT, Gemini, local models)
-- **Templates** — Fillable templates for project setup, technical specifications, and implementation planning
-- **Presets** — Pre-filled Project Definitions for common tech stacks (Rust, Node.js, Python, React, Go)
+**That's it.** The AI reads the instructions and walks you through everything else — project setup, conventions, and your first task.
 
-The methodology is **technology-agnostic** — it works for any language, framework, or project type.
+---
 
-## Quick Start
+## How It Works
 
-### 1. Set Up Your Project Definition
-
-Copy a preset from [`presets/`](presets/) or fill the template at [`templates/project/project-definition.md`](templates/project/project-definition.md). The Project Definition captures your tech stack, conventions, and quality gates — it's the single source of truth the AI references.
-
-### 2. Initialize AI Collaboration
-
-Use one of the initialization prompts from [`prompts/initialization/`](prompts/initialization/):
-
-| Prompt | When to Use |
-|--------|-------------|
-| [`new-project.md`](prompts/initialization/new-project.md) | Starting a brand-new project |
-| [`onboard-existing.md`](prompts/initialization/onboard-existing.md) | Bringing AI into an existing codebase |
-| [`resume-session.md`](prompts/operations/resume-session.md) | Resuming work from a previous session |
-
-### 3. Follow the Methodology
-
-For each unit of work, follow the 5-phase cycle using the phase transition prompts in [`prompts/phase-transitions/`](prompts/phase-transitions/):
+Design Source gives your AI assistant a structured process to follow:
 
 ```
 Analyze → Plan → Specify → Implement → Verify
 ```
 
-### 4. Use Operation Prompts as Needed
+When you initialize a project, the AI creates an `impl/` folder in your project with:
+- **Project Definition** — Your tech stack, conventions, and quality gates
+- **Memory** — What's in progress, what was decided, what's next
+- **Methodology** — The full process the AI follows
+- **Operation prompts** — Ready-made prompts for common tasks (debug, refactor, write tests, etc.)
 
-Common tasks have ready-made prompts in [`prompts/operations/`](prompts/operations/):
+This makes your project **self-contained** — any AI assistant can pick up where you (or another AI) left off.
+
+## Operation Prompts
+
+Once set up, these prompts are available in your project at `impl/operations/`:
 
 | Prompt | Purpose |
 |--------|---------|
-| `write-commit-message.md` | Generate a structured commit message |
-| `update-documentation.md` | Update docs after a change |
-| `review-changes.md` | Self-review code before committing |
+| `resume-session.md` | Pick up where you left off |
+| `save-session.md` | Save progress before ending a session |
 | `create-technical-spec.md` | Write a spec for new work |
 | `write-tests.md` | Generate tests for existing code |
-| `refactor-code.md` | Safely restructure code |
 | `debug-issue.md` | Diagnose and fix a bug |
-| `save-session.md` | Generate a session summary for next time |
-
-## Project Structure
-
-```
-design-source/
-├── methodology/          # Core process documentation
-│   ├── overview.md       # Philosophy, principles, iteration cycle
-│   ├── phases/           # Detailed guide for each of the 5 phases
-│   ├── roles.md          # Human and AI responsibilities
-│   └── decision-framework.md  # How to make and record decisions
-├── prompts/              # LLM-ready prompts (copy-paste into any AI)
-│   ├── initialization/   # Start or resume projects
-│   ├── phase-transitions/# Move between methodology phases
-│   └── operations/       # Common development tasks
-├── templates/            # User-fillable templates
-│   ├── project/          # Project Definition, Architecture Decision Record
-│   ├── specification/    # Feature, endpoint, component, bugfix, refactor specs
-│   └── implementation/   # Implementation plan, test plan
-├── presets/              # Pre-filled Project Definitions for common stacks
-└── examples/             # Community-contributed applied examples
-```
-
-## Key Concepts
-
-### The Project Definition
-
-A single document that captures everything technology-specific about your project (stack, conventions, quality gates). All prompts reference it, keeping the methodology itself agnostic.
-
-### The 5 Phases
-
-| Phase | Purpose |
-|-------|---------|
-| **Analyze** | Understand requirements, break down complexity, identify unknowns |
-| **Plan** | Define architecture, structure, milestones, and blockers |
-| **Specify** | Write technical specs for each unit of work |
-| **Implement** | Build, test, and integrate following the spec |
-| **Verify** | Run quality gates, update docs, prepare delivery |
-
-### Prompts as a Command Palette
-
-Each prompt is a self-contained Markdown file. Copy the prompt section, paste your Project Definition and context, and send to any LLM. No vendor lock-in, no special tooling required.
+| `refactor-code.md` | Safely restructure code |
+| `review-changes.md` | Self-review code before committing |
+| `write-commit-message.md` | Generate a structured commit message |
+| `update-documentation.md` | Update docs after a change |
 
 ## Available Presets
+
+Pre-filled Project Definitions for common stacks — the AI will suggest one if it matches your tech:
 
 | Preset | Stack |
 |--------|-------|
@@ -104,6 +62,15 @@ Each prompt is a self-contained Markdown file. Copy the prompt section, paste yo
 | [`python-fastapi.md`](presets/python-fastapi.md) | Python + FastAPI + pytest + ruff |
 | [`react-webapp.md`](presets/react-webapp.md) | React + TypeScript + Vite + Vitest |
 | [`go-service.md`](presets/go-service.md) | Go + stdlib + go vet/test |
+
+## Learn More
+
+- [`methodology/overview.md`](methodology/overview.md) — Philosophy, principles, and the iteration cycle
+- [`methodology/phases/`](methodology/phases/) — Detailed guide for each of the 5 phases
+- [`methodology/roles.md`](methodology/roles.md) — Human and AI responsibilities
+- [`methodology/decision-framework.md`](methodology/decision-framework.md) — How to make and record technical decisions
+- [`templates/`](templates/) — All templates (project setup, specs, implementation plans)
+- [`presets/`](presets/) — Pre-filled Project Definitions
 
 ## License
 
