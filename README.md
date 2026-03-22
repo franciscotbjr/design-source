@@ -1,5 +1,7 @@
 # Stateful Spec
 
+A Specification Driven Development methodology for AI-assisted software projects.
+
 ## Get Started
 
 Pick one file below and give it to your AI assistant. You can do this by:
