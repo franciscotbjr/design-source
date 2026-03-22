@@ -7,14 +7,14 @@ Use this prompt to begin Phase 5 (Verify) after implementation is complete. The 
 ## Prerequisites
 
 - Phase 4 (Implement) is complete — code and tests are written
-- AI has access to the **Project Profile** (specifically the Quality Gates section)
+- AI has access to the **Project Definition** (specifically the Quality Gates section)
 - AI has access to the **specification** (for acceptance criteria verification)
 
 ## Input
 
 Paste the following alongside this prompt:
 
-1. Confirm the **Project Profile** and **specification** are in context
+1. Confirm the **Project Definition** and **specification** are in context
 2. Optionally: the output of quality gate commands if you've already run them
 3. Optionally: a diff or summary of changes made
 
@@ -27,7 +27,7 @@ We are entering **Phase 5: Verify** of the Design Source methodology.
 Please help me verify the implementation is complete and meets quality standards.
 
 **Step 1: Quality Gates**
-List every quality gate from the Project Profile and confirm whether each one passes. If you can run commands, run them. If not, tell me which commands to run and I'll provide the output.
+List every quality gate from the Project Definition and confirm whether each one passes. If you can run commands, run them. If not, tell me which commands to run and I'll provide the output.
 
 **Step 2: Acceptance Criteria**
 Go through every acceptance criterion from the specification and confirm each is met, referencing the specific test or code that verifies it.
@@ -35,7 +35,7 @@ Go through every acceptance criterion from the specification and confirm each is
 **Step 3: Change Review**
 Review the changes made during implementation:
 - Are all changes intentional? Any debug code, TODO comments, or temporary hacks remaining?
-- Do all changes follow the Project Profile's conventions?
+- Do all changes follow the Project Definition's conventions?
 - Is the scope within the specification's boundaries?
 - Are there any security concerns (exposed secrets, unsafe inputs)?
 

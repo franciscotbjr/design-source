@@ -7,14 +7,14 @@ This document defines the responsibilities, expectations, and boundaries for bot
 ### Responsibilities
 
 - **Owns all decisions** — Architecture, scope, priorities, trade-offs
-- **Provides context** — Fills the Project Profile, writes specs, describes requirements
+- **Provides context** — Fills the Project Definition, writes specs, describes requirements
 - **Drives the process** — Decides when to advance phases, what to build next
 - **Reviews and approves** — Validates AI output before committing
 - **Manages the project** — Version control, deployments, stakeholder communication
 
 ### Expectations
 
-- Fill the Project Profile before starting AI-assisted work
+- Fill the Project Definition before starting AI-assisted work
 - Provide clear, specific requests (not vague "make it better")
 - Review AI-generated code before committing — AI output is a draft, not final
 - Record decisions using Architecture Decision Records when significant
@@ -25,14 +25,14 @@ This document defines the responsibilities, expectations, and boundaries for bot
 ### Responsibilities
 
 - **Follows the methodology** — Stays in the current phase, produces expected outputs
-- **Respects the Project Profile** — Follows the project's conventions, patterns, and constraints
+- **Respects the Project Definition** — Follows the project's conventions, patterns, and constraints
 - **Produces concrete artifacts** — Code, specs, plans, documentation — not just advice
 - **Asks clarifying questions** — When requirements are ambiguous or incomplete
 - **Identifies risks** — Points out edge cases, potential issues, and trade-offs
 
 ### Expectations
 
-- Read the Project Profile at the start of every session
+- Read the Project Definition at the start of every session
 - Follow the project's naming conventions, code style, and patterns
 - Write tests alongside code (not as an afterthought)
 - Stay within the scope of the current specification
@@ -45,7 +45,7 @@ The AI assistant should **NOT**:
 
 - Make architectural decisions without human approval
 - Skip methodology phases (e.g., jump from Analyze to Implement)
-- Introduce dependencies, patterns, or tools not in the Project Profile without discussion
+- Introduce dependencies, patterns, or tools not in the Project Definition without discussion
 - Commit, deploy, or make irreversible changes without explicit instruction
 - Remove or weaken tests without explicit direction
 - Assume requirements — ask when unclear
@@ -54,7 +54,7 @@ The AI assistant should **NOT**:
 
 ### Session Start
 
-1. AI reads the Project Profile
+1. AI reads the Project Definition
 2. AI reads any session context from a previous session (if resuming)
 3. Human states the current goal and phase
 4. Work begins
@@ -69,16 +69,16 @@ The AI assistant should **NOT**:
 
 ### Session End
 
-1. Use the `save-session` prompt to generate a session summary
-2. Summary captures: decisions made, files changed, next steps, open blockers
-3. Human saves the summary for the next session
+1. Use the `save-session` prompt to save progress
+2. The AI updates `memory.md` with: decisions made, files changed, next steps, open blockers
+3. Human reviews and commits the updates
 
 ## Communication Guidelines
 
 ### AI Should
 
 - Be concise and direct — avoid unnecessary preamble
-- Use the project's terminology (from the Project Profile)
+- Use the project's terminology (from the Project Definition)
 - Reference specific files, functions, and line numbers
 - Provide rationale for non-obvious choices
 - State assumptions explicitly

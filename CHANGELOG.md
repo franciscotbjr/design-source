@@ -20,10 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Phase transitions (start analysis, planning, specification, implementation, verification)
   - Operations (commit message, update docs, review changes, create spec, write tests, refactor, debug, save session)
 - **Templates** — 10 user-fillable templates:
-  - Project: Project Profile, Architecture Decision Record
+  - Project: Project Definition, Architecture Decision Record
   - Specification: feature, endpoint, component, bugfix, refactor
   - Implementation: implementation plan, test plan
-- **Presets** — 5 pre-filled Project Profiles for common stacks:
+- **Presets** — 5 pre-filled Project Definitions for common stacks:
   - Rust library, Node.js + Express API, Python + FastAPI, React web app, Go service
 
 ### Removed

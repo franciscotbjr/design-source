@@ -7,7 +7,7 @@ Use this prompt to begin Phase 2 (Plan) after completing the analysis of a work 
 ## Prerequisites
 
 - Phase 1 (Analyze) is complete — requirements understood, complexity assessed, open questions resolved
-- AI has access to the **Project Profile**
+- AI has access to the **Project Definition**
 
 ## Input
 
@@ -24,7 +24,7 @@ We are entering **Phase 2: Plan** of the Design Source methodology.
 
 Based on the analysis we completed, please create an implementation plan:
 
-1. **Architecture Design** — Where does this code live? What modules, files, or components are affected? What patterns from the Project Profile apply?
+1. **Architecture Design** — Where does this code live? What modules, files, or components are affected? What patterns from the Project Definition apply?
 2. **Milestones** — Break the work into ordered, deliverable milestones. Each milestone must be independently testable and produce working software.
 3. **File Changes** — For each milestone, list which files will be created, modified, or deleted
 4. **Blockers** — Are there any decisions, dependencies, or unknowns that could prevent progress?
@@ -40,7 +40,7 @@ When planning is complete, state whether we can proceed to Phase 3 (Specify) or 
 
 ## Expected Output
 
-1. Architecture description aligned with Project Profile
+1. Architecture description aligned with Project Definition
 2. Ordered milestone list with file changes per milestone
 3. Blockers and resolution paths (if any)
 4. Risk assessment (for complex work)

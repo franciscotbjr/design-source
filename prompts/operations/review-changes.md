@@ -7,7 +7,7 @@ Use this prompt to perform a self-review of code changes before committing or cr
 ## Prerequisites
 
 - Code changes are complete
-- AI has access to the **Project Profile** for convention checking
+- AI has access to the **Project Definition** for convention checking
 
 ## Input
 
@@ -15,7 +15,7 @@ Paste the following alongside this prompt:
 
 1. The **diff** or **list of changed files with descriptions**
 2. The **specification** or **task description** that motivated the changes
-3. Your **Project Profile** (if the AI doesn't already have it in context)
+3. Your **Project Definition** (if the AI doesn't already have it in context)
 
 ## Prompt
 
@@ -35,7 +35,7 @@ Review the changes against these criteria:
 
 1. **Correctness** — Does the code do what the spec says? Are there logic errors?
 2. **Completeness** — Are all acceptance criteria from the spec addressed? Anything missing?
-3. **Convention Compliance** — Does the code follow the Project Profile's naming, style, and patterns?
+3. **Convention Compliance** — Does the code follow the Project Definition's naming, style, and patterns?
 4. **Test Coverage** — Are there tests for happy path, edge cases, and error cases? Are any scenarios missing?
 5. **Security** — Any exposed secrets, unsafe inputs, missing validation, or injection risks?
 6. **Performance** — Any obvious performance issues (N+1 queries, unnecessary loops, missing indexes)?

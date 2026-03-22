@@ -6,7 +6,7 @@ Use this prompt when you need the AI to help you write a technical specification
 
 ## Prerequisites
 
-- AI has access to the **Project Profile**
+- AI has access to the **Project Definition**
 - You have a description of what needs to be built or changed
 - You know which specification template to use
 
@@ -14,7 +14,7 @@ Use this prompt when you need the AI to help you write a technical specification
 
 Paste the following alongside this prompt:
 
-1. Your **Project Profile** (if the AI doesn't already have it in context)
+1. Your **Project Definition** (if the AI doesn't already have it in context)
 2. A **description of the work** (feature request, bug report, refactoring goal, etc.)
 3. The **specification template** you want to use (copy from `templates/specification/`)
 
@@ -37,7 +37,7 @@ I need a technical specification for the following work. Please analyze the requ
 2. Then fill in every section of the template with specific, actionable content
 3. Ensure acceptance criteria are measurable and testable
 4. Include test scenarios for happy path, edge cases, AND error cases
-5. Follow the Project Profile's conventions for all code examples, naming, and patterns
+5. Follow the Project Definition's conventions for all code examples, naming, and patterns
 6. Flag anything you're unsure about as an open question rather than guessing
 
 The specification should be detailed enough that someone could implement it without needing to ask clarifying questions.

@@ -4,6 +4,8 @@ A structured, technology-agnostic framework for designing and building software 
 
 ## Philosophy
 
+**If you give an AI structured context and memory, it becomes a reliable collaborator instead of a stateless tool.**
+
 Software development with AI assistants works best when both human and AI operate within a shared, explicit process. Ad-hoc prompting produces inconsistent results. A methodology provides:
 
 - **Predictability** — Both parties know what phase they're in and what's expected
@@ -67,7 +69,7 @@ Every unit of work follows 5 phases:
 ### For the Human
 
 1. **Fill the Project Definition** — Once per project, describe your tech stack, conventions, and quality gates using the `templates/project/project-definition.md` template (or copy a preset from `presets/`)
-2. **Use prompts to drive the AI** — Copy prompts from the `prompts/` directory and paste them into your AI assistant alongside your Project Definition
+2. **Use prompts to drive the AI** — Operation prompts are available as native agent commands (e.g., `/resume-session` in Claude Code, Windsurf, etc.) or in `design-source/operations/`
 3. **Write specs for each work unit** — Use the specification templates in `templates/specification/` to describe what needs to be built
 4. **Follow the phases** — Move through Analyze → Plan → Specify → Implement → Verify for each feature, bugfix, or refactoring
 
@@ -97,8 +99,9 @@ Projects using Design Source maintain a `design-source/` directory at the projec
 ```
 your-project/
 └── design-source/
-    ├── memory.md           # Current context — AI reads this first
+    ├── memory.md              # Current context — AI reads this first
     ├── project-definition.md  # Technology stack, conventions, quality gates
+    ├── operations/            # Operation prompts (only if native agent commands aren't used)
     └── history/
         ├── 001-feature-x.md
         ├── 002-bugfix-y.md
@@ -108,6 +111,7 @@ your-project/
 ### Why This Matters
 
 - **Multi-developer continuity** — Any developer can onboard an AI assistant by pointing it to `design-source/memory.md`
+- **Agent portability** — Works with any AI coding agent (Claude Code, Windsurf, Cursor, Codex, and others); switch agents without losing context
 - **Session persistence** — Work state survives across chat sessions without manual context restoration
 - **Iteration tracking** — Each feature, bugfix, or refactor has its own file with acceptance criteria and task checklists
 - **Version controlled** — The entire `design-source/` directory is committed to the repository

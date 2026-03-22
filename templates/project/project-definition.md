@@ -1,4 +1,4 @@
-# Project Profile
+# Project Definition
 
 > Fill this template once per project. It is the single source of technology-specific information that all prompts and AI interactions reference.
 

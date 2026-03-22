@@ -60,7 +60,7 @@ The record should capture:
 Ensure the decision is visible:
 - Reference the ADR in relevant code comments
 - Mention it in PR descriptions
-- Update the Project Profile if the decision changes conventions
+- Update the Project Definition if the decision changes conventions
 
 ## Handling Uncertainty
 
@@ -71,7 +71,7 @@ When you're unsure:
 | Missing information | Ask the human — don't guess |
 | Multiple good options | Pick the simplest; record why in an ADR |
 | Conflicting requirements | Surface the conflict to the human for resolution |
-| No precedent in the project | Check the Project Profile, then propose and ask |
+| No precedent in the project | Check the Project Definition, then propose and ask |
 | Time pressure | Make the reversible choice; create a follow-up task for the better solution |
 
 ## Revisiting Decisions

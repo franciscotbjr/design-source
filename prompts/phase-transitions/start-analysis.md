@@ -6,14 +6,14 @@ Use this prompt to begin Phase 1 (Analyze) for a new work unit. This is the entr
 
 ## Prerequisites
 
-- AI has access to the **Project Profile**
+- AI has access to the **Project Definition**
 - You have a description of what needs to be built or changed
 
 ## Input
 
 Paste the following alongside this prompt:
 
-1. Your **Project Profile** (if the AI doesn't already have it in context)
+1. Your **Project Definition** (if the AI doesn't already have it in context)
 2. The **work request** (feature description, bug report, change request, etc.)
 
 ## Prompt

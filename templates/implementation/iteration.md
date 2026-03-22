@@ -35,7 +35,7 @@
 
 ## Quality Checks
 
-> Standard checks from the Project Profile. Verify before marking done.
+> Standard checks from the Project Definition. Verify before marking done.
 
 - [ ] All quality gates pass (lint, format, type check, tests, build)
 - [ ] Tests cover acceptance criteria

@@ -6,14 +6,14 @@ Use this prompt when you encounter a bug or unexpected behavior and need AI assi
 
 ## Prerequisites
 
-- AI has access to the **Project Profile**
+- AI has access to the **Project Definition**
 - You can describe the problem (error message, unexpected behavior, failing test)
 
 ## Input
 
 Paste the following alongside this prompt:
 
-1. Your **Project Profile** (if the AI doesn't already have it in context)
+1. Your **Project Definition** (if the AI doesn't already have it in context)
 2. The **problem description** (error message, unexpected behavior, steps to reproduce)
 3. The **relevant code** (paste source files, stack traces, logs)
 4. What you've **already tried** (if anything)

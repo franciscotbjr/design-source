@@ -6,7 +6,7 @@ Use this prompt when you need to restructure existing code without changing its 
 
 ## Prerequisites
 
-- AI has access to the **Project Profile**
+- AI has access to the **Project Definition**
 - You know what code needs refactoring and why
 - Existing tests pass (baseline for behavior preservation)
 
@@ -14,7 +14,7 @@ Use this prompt when you need to restructure existing code without changing its 
 
 Paste the following alongside this prompt:
 
-1. Your **Project Profile** (if the AI doesn't already have it in context)
+1. Your **Project Definition** (if the AI doesn't already have it in context)
 2. The **code to refactor** (paste the source or reference the files)
 3. The **reason for refactoring** (what problem the current structure causes)
 4. Optionally: what the **desired outcome** looks like
@@ -45,7 +45,7 @@ I need to refactor the following code. The refactoring must NOT change any exter
 5. After each step, confirm that:
    - External behavior is unchanged
    - All existing tests should still pass
-   - The code follows the Project Profile's conventions
+   - The code follows the Project Definition's conventions
 6. If new tests are needed to cover the refactored code, write them
 7. Do NOT change any public API, interface, or behavior unless explicitly discussed
 

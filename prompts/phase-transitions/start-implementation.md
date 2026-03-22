@@ -2,12 +2,12 @@
 
 ## Context
 
-Use this prompt to begin Phase 4 (Implement) after the specification is written and reviewed. The AI will write code, tests, and documentation following the spec and Project Profile conventions.
+Use this prompt to begin Phase 4 (Implement) after the specification is written and reviewed. The AI will write code, tests, and documentation following the spec and Project Definition conventions.
 
 ## Prerequisites
 
 - Phase 3 (Specify) is complete — specification reviewed and approved
-- AI has access to the **Project Profile** and the **specification**
+- AI has access to the **Project Definition** and the **specification**
 - Optionally: an implementation plan from `templates/implementation/implementation-plan.md`
 
 ## Input
@@ -32,7 +32,7 @@ Please implement the specification we wrote, following this order:
 5. **Documentation** — Add inline documentation for non-obvious logic
 
 **Rules for implementation:**
-- Follow ALL conventions from the Project Profile (naming, style, patterns, file organization)
+- Follow ALL conventions from the Project Definition (naming, style, patterns, file organization)
 - Write tests alongside code — not after everything is done
 - Make each change committable independently when possible
 - Stay within the scope of the specification — do not add features or improvements not in the spec
@@ -51,7 +51,7 @@ Start with step 1 (Data/Types) and proceed through each step. After each step, b
 Working code that:
 1. Implements all acceptance criteria from the spec
 2. Includes tests for happy path, edge cases, and error cases
-3. Follows Project Profile conventions
+3. Follows Project Definition conventions
 4. Is documented where non-obvious
 
 ## Next Steps

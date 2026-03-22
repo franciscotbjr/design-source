@@ -7,7 +7,7 @@ Use this prompt to begin Phase 3 (Specify) after completing the plan for a work 
 ## Prerequisites
 
 - Phase 2 (Plan) is complete — architecture defined, milestones ordered, blockers resolved
-- AI has access to the **Project Profile**
+- AI has access to the **Project Definition**
 - You know which **specification template** to use (feature, endpoint, component, bugfix, or refactor)
 
 ## Input
@@ -39,7 +39,7 @@ The specification must include:
 6. **Dependencies** — What this depends on and what it impacts
 7. **Implementation Notes** — Hints, constraints, suggested approach
 
-Follow the Project Profile's conventions for all code examples and naming.
+Follow the Project Definition's conventions for all code examples and naming.
 
 Do NOT write implementation code yet. This phase is specification only.
 

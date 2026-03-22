@@ -10,14 +10,14 @@
 ## Inputs
 
 - Implemented code with tests (from Phase 4)
-- Project Profile — specifically the **Quality Gates** section
+- Project Definition — specifically the **Quality Gates** section
 - Specification documents — for acceptance criteria verification
 
 ## Activities
 
 ### 1. Run Quality Gates
 
-Execute every quality gate defined in the Project Profile. Common examples:
+Execute every quality gate defined in the Project Definition. Common examples:
 
 | Gate | Example Commands | Purpose |
 |------|-----------------|---------|
@@ -44,7 +44,7 @@ If any criterion is not met, return to the Implement phase.
 Perform a self-review (or use the `prompts/operations/review-changes.md` prompt):
 
 - **Diff review** — Are all changes intentional? Any debug code left?
-- **Convention check** — Does everything follow the Project Profile?
+- **Convention check** — Does everything follow the Project Definition?
 - **Scope check** — Did the implementation stay within the spec's boundaries?
 - **Security check** — No secrets, no unsafe inputs, no exposed internals?
 
@@ -75,7 +75,7 @@ Depending on the project:
 
 ## Completion Criteria
 
-- [ ] All quality gates from the Project Profile pass
+- [ ] All quality gates from the Project Definition pass
 - [ ] All acceptance criteria from the spec are verified
 - [ ] Changes are self-reviewed (no debug code, no scope creep)
 - [ ] Documentation is updated

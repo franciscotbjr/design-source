@@ -8,7 +8,7 @@
 
 - **Feature/Spec Reference:** [Link or name of the specification being tested]
 - **Status:** Draft | Ready | In Progress | Complete
-- **Test Framework:** [e.g., Jest, pytest, cargo test — from Project Profile]
+- **Test Framework:** [e.g., Jest, pytest, cargo test — from Project Definition]
 
 ## Test Scope
 

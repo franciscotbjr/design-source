@@ -6,7 +6,7 @@ Use this prompt when you need the AI to write tests for existing or newly implem
 
 ## Prerequisites
 
-- AI has access to the **Project Profile** (for testing framework and conventions)
+- AI has access to the **Project Definition** (for testing framework and conventions)
 - The code to be tested exists
 - Optionally: a specification with test scenarios defined
 
@@ -14,7 +14,7 @@ Use this prompt when you need the AI to write tests for existing or newly implem
 
 Paste the following alongside this prompt:
 
-1. Your **Project Profile** (if the AI doesn't already have it in context)
+1. Your **Project Definition** (if the AI doesn't already have it in context)
 2. The **code to be tested** (paste the source or reference the files)
 3. Optionally: the **specification** with test scenarios
 4. Optionally: **existing tests** for context on testing patterns used in the project
@@ -23,7 +23,7 @@ Paste the following alongside this prompt:
 
 <!-- Copy from here -->
 
-Please write tests for the following code. Follow the project's testing conventions from the Project Profile.
+Please write tests for the following code. Follow the project's testing conventions from the Project Definition.
 
 **Code to test:**
 
@@ -38,7 +38,7 @@ Please write tests for the following code. Follow the project's testing conventi
 {{EXISTING_TESTS_OR_NONE}}
 
 **Instructions:**
-1. Use the testing framework and patterns specified in the Project Profile
+1. Use the testing framework and patterns specified in the Project Definition
 2. Follow the project's test naming convention
 3. Write tests for:
    - **Happy path** — Normal, expected usage
@@ -49,7 +49,7 @@ Please write tests for the following code. Follow the project's testing conventi
 6. Include setup/teardown if needed (fixtures, mocks, test data)
 7. Keep tests focused — one assertion concept per test
 
-Place tests in the location specified by the Project Profile (co-located with source, tests/ directory, etc.).
+Place tests in the location specified by the Project Definition (co-located with source, tests/ directory, etc.).
 
 <!-- To here -->
 
