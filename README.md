@@ -1,7 +1,5 @@
 # Design Source
 
-**v0.2.0** — A methodology for building software with AI assistance.
-
 ## Get Started
 
 Pick one file below and give it to your AI assistant. You can do this by:
