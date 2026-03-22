@@ -17,6 +17,28 @@ Pick one file below and give it to your AI assistant. You can do this by:
 
 ---
 
+## Example
+
+Here's what it looks like in practice. You point your AI to an operation prompt and a business document:
+
+> **You:** Read `create-technical-spec.md` and use it to write a spec based on `requirements/user-notifications.md`.
+
+> **AI:** I've analyzed the requirements. Here's the technical specification:
+>
+> **Feature:** User Notification System
+> **Complexity:** Medium — requires a new service, database table, and WebSocket integration
+>
+> **Acceptance Criteria:**
+> 1. Users receive real-time notifications for mentions and replies
+> 2. Notifications persist and can be marked as read
+> 3. API supports pagination with a maximum of 50 notifications per page
+>
+> *[... full spec follows the project's template and conventions]*
+
+That's the pattern — **you provide context, the AI follows the methodology.**
+
+---
+
 ## How It Works
 
 Design Source gives your AI assistant a structured process to follow:
