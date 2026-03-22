@@ -35,6 +35,10 @@ When you initialize a project, the AI creates a `design-source/` folder in your 
 
 This makes your project **self-contained** — any AI assistant can pick up where you (or another AI) left off.
 
+## Philosophy
+
+**If you give an AI structured context and memory, it becomes a reliable collaborator instead of a stateless tool.**
+
 ## Operation Prompts
 
 Once set up, these prompts are available in your project — either as native agent commands (e.g., `/resume-session` in Windsurf, Claude Code, etc.) or in `design-source/operations/`:
