@@ -1,4 +1,4 @@
-# Design Source
+# Stateful Spec
 
 ## Get Started
 
@@ -41,13 +41,13 @@ That's the pattern — **you provide context, the AI follows the methodology.**
 
 ## How It Works
 
-Design Source gives your AI assistant a structured process to follow:
+Stateful Spec gives your AI assistant a structured process to follow:
 
 ```
 Analyze → Plan → Specify → Implement → Verify
 ```
 
-When you initialize a project, the AI creates a `design-source/` folder in your project with:
+When you initialize a project, the AI creates a `.stateful-spec/` folder in your project with:
 - **Project Definition** — Your tech stack, conventions, and quality gates
 - **Memory** — What's in progress, what was decided, what's next
 - **Methodology** — The full process the AI follows
@@ -61,7 +61,7 @@ This makes your project **self-contained** — any AI assistant can pick up wher
 
 ## Operation Prompts
 
-Once set up, these prompts are available in your project — either as native agent commands (e.g., `/resume-session` in Windsurf, Claude Code, etc.) or in `design-source/operations/`:
+Once set up, these prompts are available in your project — either as native agent commands (e.g., `/resume-session` in Windsurf, Claude Code, etc.) or in `.stateful-spec/operations/`:
 
 | Prompt | Purpose |
 |--------|---------|

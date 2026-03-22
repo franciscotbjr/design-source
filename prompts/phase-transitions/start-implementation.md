@@ -22,7 +22,7 @@ Paste the following alongside this prompt:
 
 <!-- Copy from here -->
 
-We are entering **Phase 4: Implement** of the Design Source methodology.
+We are entering **Phase 4: Implement** of the Stateful Spec methodology.
 
 Please implement the specification we wrote, following this order:
 1. **Data/Types** — Define data structures, types, schemas, interfaces

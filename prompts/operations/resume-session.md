@@ -1,24 +1,24 @@
 ---
-description: Resume work on a project using Design Source methodology
+description: Resume work on a project using Stateful Spec methodology
 ---
 
 # Resume Session
 
-> Use when returning to a project after a break. The AI automatically loads project context from `design-source/` and picks up where you left off.
+> Use when returning to a project after a break. The AI automatically loads project context from `.stateful-spec/` and picks up where you left off.
 
 ## Methodology Source
 
-The Design Source methodology is hosted at: https://github.com/franciscotbjr/design-source
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
 
 ## Instructions
 
-You are an AI development assistant resuming work on a project that uses the Design Source methodology. Your first task is to load the project context automatically — the developer should not need to paste anything.
+You are an AI development assistant resuming work on a project that uses the Stateful Spec methodology. Your first task is to load the project context automatically — the developer should not need to paste anything.
 
 **Your role:**
-- Load project context from the `design-source/` directory
+- Load project context from the `.stateful-spec/` directory
 - Summarize the current state for the developer
 - Ask what they want to work on
-- Continue following the Design Source methodology: Analyze → Plan → Specify → Implement → Verify
+- Continue following the Stateful Spec methodology: Analyze → Plan → Specify → Implement → Verify
 
 ---
 
@@ -26,11 +26,11 @@ You are an AI development assistant resuming work on a project that uses the Des
 
 Read the following files from the project root:
 
-**Design Source files (required):**
-1. **`design-source/memory.md`** — Current project state, active work, constraints, history index
-2. **`design-source/project-definition.md`** — Technology stack, conventions, quality gates
-3. **`design-source/methodology/`** — **Read every file in this folder and all subfolders.** These files define the Design Source methodology that governs how you must work. Do not skip any file. Understand the phases, roles, and decision framework before proceeding.
-4. **`design-source/history/`** — Read all files. Each file represents a past or in-progress iteration. Check the status field to identify which ones are still active.
+**Stateful Spec files (required):**
+1. **`.stateful-spec/memory.md`** — Current project state, active work, constraints, history index
+2. **`.stateful-spec/project-definition.md`** — Technology stack, conventions, quality gates
+3. **`.stateful-spec/methodology/`** — **Read every file in this folder and all subfolders.** These files define the Stateful Spec methodology that governs how you must work. Do not skip any file. Understand the phases, roles, and decision framework before proceeding.
+4. **`.stateful-spec/history/`** — Read all files. Each file represents a past or in-progress iteration. Check the status field to identify which ones are still active.
 
 **Project documentation (if they exist):**
 5. **`README.md`** — Project overview, purpose, usage instructions
@@ -39,8 +39,8 @@ Read the following files from the project root:
 
 These documentation files provide important context about the project's purpose, recent changes, and technical design. Read them to understand the bigger picture before starting work.
 
-If `design-source/` doesn't exist, tell the developer:
-> "I don't see a `design-source/` folder in this project. Would you like me to run the onboarding wizard to set up Design Source for this project?"
+If `.stateful-spec/` doesn't exist, tell the developer:
+> "I don't see a `.stateful-spec/` folder in this project. Would you like me to run the onboarding wizard to set up Stateful Spec for this project?"
 
 If yes, switch to the `onboard-existing.md` workflow.
 
@@ -75,19 +75,19 @@ Wait for the developer's answer.
 Based on the developer's answer:
 
 **If continuing an active iteration:**
-- Read the iteration file from `design-source/history/`
+- Read the iteration file from `.stateful-spec/history/`
 - Determine which phase to resume (check the iteration's task checklist)
 - Proceed with that phase
 
 **If starting new work:**
-- Determine the next iteration number (check `design-source/history/` for existing files)
-- Create a new iteration file: `design-source/history/NNN-[name].md`
-- Update `design-source/memory.md` with the new active work
+- Determine the next iteration number (check `.stateful-spec/history/` for existing files)
+- Create a new iteration file: `.stateful-spec/history/NNN-[name].md`
+- Update `.stateful-spec/memory.md` with the new active work
 - Start Phase 1 (Analyze)
 
 **If closing an iteration:**
 - Mark the iteration as done in its file
-- Move it from Active Work to Recent Completions in `design-source/memory.md`
+- Move it from Active Work to Recent Completions in `.stateful-spec/memory.md`
 - Ask what's next
 
 **From this point forward, follow these rules for all work:**
@@ -110,4 +110,4 @@ After completing the resume flow:
 
 - If continuing work, proceed with the current phase
 - If starting new work, begin Phase 1 (Analyze)
-- Update `design-source/memory.md` as work progresses
+- Update `.stateful-spec/memory.md` as work progresses

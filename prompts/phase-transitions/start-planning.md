@@ -20,7 +20,7 @@ Paste the following alongside this prompt:
 
 <!-- Copy from here -->
 
-We are entering **Phase 2: Plan** of the Design Source methodology.
+We are entering **Phase 2: Plan** of the Stateful Spec methodology.
 
 Based on the analysis we completed, please create an implementation plan:
 
