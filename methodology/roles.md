@@ -1,6 +1,6 @@
 # Roles: Human and AI Assistant
 
-This document defines the responsibilities, expectations, and boundaries for both the human developer and the AI assistant when working within the Design Source methodology.
+This document defines the responsibilities, expectations, and boundaries for both the human developer and the AI assistant when working within the Stateful Spec methodology.
 
 ## The Human Developer
 

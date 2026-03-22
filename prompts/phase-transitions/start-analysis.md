@@ -20,7 +20,7 @@ Paste the following alongside this prompt:
 
 <!-- Copy from here -->
 
-We are entering **Phase 1: Analyze** of the Design Source methodology.
+We are entering **Phase 1: Analyze** of the Stateful Spec methodology.
 
 **Work request:**
 

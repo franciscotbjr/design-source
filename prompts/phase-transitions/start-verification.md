@@ -22,7 +22,7 @@ Paste the following alongside this prompt:
 
 <!-- Copy from here -->
 
-We are entering **Phase 5: Verify** of the Design Source methodology.
+We are entering **Phase 5: Verify** of the Stateful Spec methodology.
 
 Please help me verify the implementation is complete and meets quality standards.
 

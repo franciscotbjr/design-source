@@ -22,7 +22,7 @@ Paste the following alongside this prompt:
 
 <!-- Copy from here -->
 
-We are entering **Phase 3: Specify** of the Design Source methodology.
+We are entering **Phase 3: Specify** of the Stateful Spec methodology.
 
 Based on the plan we created, please write a detailed technical specification for the current milestone.
 

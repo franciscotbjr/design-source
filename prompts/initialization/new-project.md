@@ -8,7 +8,7 @@ description: Interactive wizard to set up a new project with AI assistance
 
 ## Methodology Source
 
-The Design Source methodology is hosted at: https://github.com/franciscotbjr/design-source
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
 
 Key resources in the repository:
 
@@ -25,7 +25,7 @@ You are an AI development assistant. Guide the developer through an interactive 
 
 **Your role:**
 - Act as a project setup tutor — ask questions, propose defaults, and help the developer make decisions
-- Follow the Design Source methodology: Analyze → Plan → Specify → Implement → Verify
+- Follow the Stateful Spec methodology: Analyze → Plan → Specify → Implement → Verify
 - Generate a complete Project Definition document at the end of the wizard
 - Then help the developer start working on the first feature
 
@@ -41,7 +41,7 @@ You are an AI development assistant. Guide the developer through an interactive 
 
 ### STEP 0 — Load Methodology
 
-Before starting the wizard, try to access the Design Source methodology repository at the URL above. Read the following files if possible:
+Before starting the wizard, try to access the Stateful Spec methodology repository at the URL above. Read the following files if possible:
 - `templates/project/project-definition.md` (to know the exact structure to generate)
 - The preset that matches the developer's stack from `presets/` (to propose accurate defaults)
 
@@ -74,7 +74,7 @@ Tell the developer what you found:
 > "I found an existing project structure in this folder: [list what was found, e.g., 'Cargo.toml, src/, .git/']"
 
 Then ask:
-> "Do you want to configure Design Source for this existing project, or start fresh in a different location?"
+> "Do you want to configure Stateful Spec for this existing project, or start fresh in a different location?"
 
 - **If configuring existing:** Note what already exists (will skip creating those in Step 8.75). Proceed with the wizard to document the project.
 - **If starting fresh:** Ask for a new folder name, create it, and use it as the project root.
@@ -248,11 +248,11 @@ If yes, run `git init`.
 
 **Then always ask the developer to confirm:**
 
-> "I'm running as **[Agent Name]**. Would you like me to set up Design Source prompts as native [Agent] commands? This lets you invoke them directly (e.g., `/resume-session`) instead of referencing files manually."
+> "I'm running as **[Agent Name]**. Would you like me to set up Stateful Spec prompts as native [Agent] commands? This lets you invoke them directly (e.g., `/resume-session`) instead of referencing files manually."
 >
 > 1. **Yes, use [Agent Name]**
 > 2. **Use a different agent** — I'll show you the supported list
-> 3. **Skip** — use `design-source/operations/` instead
+> 3. **Skip** — use `.stateful-spec/operations/` instead
 
 **If the developer picks "Use a different agent"**, show:
 > - Claude Code
@@ -266,26 +266,26 @@ Record the developer's choice — it determines how files are placed in the next
 
 ### STEP 8.6 — Create Memory Structure
 
-Create the `design-source/` directory structure at the project root. The operation prompts placement depends on the agent choice from STEP 8.5:
+Create the `.stateful-spec/` directory structure at the project root. The operation prompts placement depends on the agent choice from STEP 8.5:
 
 **Always create:**
 
-1. **`design-source/memory.md`** with:
+1. **`.stateful-spec/memory.md`** with:
    - Project name and description from Step 1
    - Current status: "Active development"
    - Empty Active Work section
    - Constraints from Step 7
    - Empty History Index
 
-2. **`design-source/project-definition.md`** — Save the approved Project Definition
+2. **`.stateful-spec/project-definition.md`** — Save the approved Project Definition
 
-3. **`design-source/methodology/`** — Copy the entire `methodology/` folder from Design Source, including all subfolders and files.
+3. **`.stateful-spec/methodology/`** — Copy the entire `methodology/` folder from Stateful Spec, including all subfolders and files.
 
-4. **`design-source/history/`** — Create empty directory for iteration tracking
+4. **`.stateful-spec/history/`** — Create empty directory for iteration tracking
 
 **If the developer accepted native commands (STEP 8.5):**
 
-Create agent-native commands for each operation prompt from the Design Source `prompts/operations/` folder. Adapt the format to match the agent's conventions:
+Create agent-native commands for each operation prompt from the Stateful Spec `prompts/operations/` folder. Adapt the format to match the agent's conventions:
 
 **Claude Code** — For each prompt, create `.claude/commands/<name>.md`:
 ```markdown
@@ -301,19 +301,19 @@ description: <one-line description from the prompt>
 <prompt content>
 ```
 
-**Cursor** — Create `.cursor/rules/design-source.mdc` with:
+**Cursor** — Create `.cursor/rules/stateful-spec.mdc` with:
 ```yaml
 ---
-description: "Design Source methodology — invoke with @design-source"
+description: "Stateful Spec methodology — invoke with @stateful-spec"
 alwaysApply: false
 ---
-<reference to design-source/methodology/>
+<reference to .stateful-spec/methodology/>
 ```
-Also create an `AGENTS.md` at project root referencing the Design Source methodology and operations.
+Also create an `AGENTS.md` at project root referencing the Stateful Spec methodology and operations.
 
-**Codex** — Create `AGENTS.md` at project root with Design Source methodology instructions. Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
+**Codex** — Create `AGENTS.md` at project root with Stateful Spec methodology instructions. Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
 
-**Antigravity** — Create `.antigravity/rules.md` with Design Source conventions and methodology references. Create workflow files in `.antigravity/workflows/` for each operation prompt.
+**Antigravity** — Create `.antigravity/rules.md` with Stateful Spec conventions and methodology references. Create workflow files in `.antigravity/workflows/` for each operation prompt.
 
 **OpenCode** — For each prompt, create `.opencode/commands/<name>.md`:
 ```yaml
@@ -323,21 +323,21 @@ description: <one-line description from the prompt>
 <prompt content>
 ```
 
-Do **NOT** create `design-source/operations/` — the prompts already live in the agent's native location.
+Do **NOT** create `.stateful-spec/operations/` — the prompts already live in the agent's native location.
 
 Tell the developer:
 
-> "I've created the `design-source/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly."
+> "I've created the `.stateful-spec/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly."
 
 **If the developer skipped native commands (STEP 8.5):**
 
 Also create:
 
-5. **`design-source/operations/`** — Copy the entire `prompts/operations/` folder from Design Source. This includes resume-session, save-session, and all other operation prompts.
+5. **`.stateful-spec/operations/`** — Copy the entire `prompts/operations/` folder from Stateful Spec. This includes resume-session, save-session, and all other operation prompts.
 
 Tell the developer:
 
-> "I've created the `design-source/` folder with project memory, operation prompts, and the Design Source methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Design Source repository."
+> "I've created the `.stateful-spec/` folder with project memory, operation prompts, and the Stateful Spec methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Stateful Spec repository."
 
 ### STEP 9 — First Feature
 
@@ -345,14 +345,14 @@ Ask: *"What do you want to build first?"*
 
 Once the developer describes their first feature:
 
-1. **Create iteration file:** Create `design-source/history/001-[feature-name].md` using the iteration template with:
+1. **Create iteration file:** Create `.stateful-spec/history/001-[feature-name].md` using the iteration template with:
    - Type: feature (or bugfix/refactor as appropriate)
    - Status: in-progress
    - Description from the developer
    - Acceptance criteria as checkboxes (ask the developer to confirm or add more)
    - Implementation tasks as checkboxes (propose based on the feature)
 
-2. **Update memory:** Add the iteration to `design-source/memory.md`:
+2. **Update memory:** Add the iteration to `.stateful-spec/memory.md`:
    - Add to Active Work section
    - Add to History Index
 
@@ -375,17 +375,17 @@ Produce the following artifacts during the wizard:
 
 1. **Project scaffolding** (Step 8.75) — project structure, dependencies, standard files (as approved by developer)
 2. **Agent detection** (Step 8.5) — Code Agent identified and confirmed by developer
-3. **Project memory structure** (`design-source/` directory) — created at the project root
-4. **Project Definition** (`design-source/project-definition.md`) — generated from the conversation and approved
-5. **Memory file** (`design-source/memory.md`) — initialized with project context
-6. **Operation prompts** — placed as native agent commands (if accepted) or in `design-source/operations/` (if skipped)
-7. **First iteration file** (`design-source/history/001-[name].md`) — with acceptance criteria and task checklist
+3. **Project memory structure** (`.stateful-spec/` directory) — created at the project root
+4. **Project Definition** (`.stateful-spec/project-definition.md`) — generated from the conversation and approved
+5. **Memory file** (`.stateful-spec/memory.md`) — initialized with project context
+6. **Operation prompts** — placed as native agent commands (if accepted) or in `.stateful-spec/operations/` (if skipped)
+7. **First iteration file** (`.stateful-spec/history/001-[name].md`) — with acceptance criteria and task checklist
 8. **Analysis of the first feature** — requirements, complexity, dependencies, open questions
 
 ## Next Steps
 
 After completing the wizard:
-- The `design-source/` structure is already created and ready to version control
+- The `.stateful-spec/` structure is already created and ready to version control
 - If there are open questions about the first feature, resolve them before proceeding
 - Advance to Phase 2 (Plan) — refer to `methodology/phases/02-plan.md` or `prompts/phase-transitions/start-planning.md`
 - As work progresses, update the iteration file's checklists and the memory file's status

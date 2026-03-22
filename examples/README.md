@@ -1,6 +1,6 @@
 # Examples
 
-This directory is reserved for community-contributed examples showing how the Design Source methodology has been applied to real projects.
+This directory is reserved for community-contributed examples showing how the Stateful Spec methodology has been applied to real projects.
 
 ## How to Contribute an Example
 
@@ -24,8 +24,8 @@ This directory is reserved for community-contributed examples showing how the De
 - **Scope:** [what was built]
 
 ## Methodology Application
-[How you used Design Source — which phases, templates, and prompts]
-[How the `design-source/` folder helped with continuity across sessions]
+[How you used Stateful Spec — which phases, templates, and prompts]
+[How the `.stateful-spec/` folder helped with continuity across sessions]
 
 ## Key Takeaways
 [What worked, what didn't, lessons learned]

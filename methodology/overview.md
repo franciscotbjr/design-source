@@ -1,4 +1,4 @@
-# Design Source Methodology
+# Stateful Spec Methodology
 
 A structured, technology-agnostic framework for designing and building software with AI assistance.
 
@@ -69,7 +69,7 @@ Every unit of work follows 5 phases:
 ### For the Human
 
 1. **Fill the Project Definition** — Once per project, describe your tech stack, conventions, and quality gates using the `templates/project/project-definition.md` template (or copy a preset from `presets/`)
-2. **Use prompts to drive the AI** — Operation prompts are available as native agent commands (e.g., `/resume-session` in Claude Code, Windsurf, etc.) or in `design-source/operations/`
+2. **Use prompts to drive the AI** — Operation prompts are available as native agent commands (e.g., `/resume-session` in Claude Code, Windsurf, etc.) or in `.stateful-spec/operations/`
 3. **Write specs for each work unit** — Use the specification templates in `templates/specification/` to describe what needs to be built
 4. **Follow the phases** — Move through Analyze → Plan → Specify → Implement → Verify for each feature, bugfix, or refactoring
 
@@ -94,11 +94,11 @@ The methodology adapts to work of any size:
 
 ## Project Memory Structure
 
-Projects using Design Source maintain a `design-source/` directory at the project root for tracking state across sessions and developers:
+Projects using Stateful Spec maintain a `.stateful-spec/` directory at the project root for tracking state across sessions and developers:
 
 ```
 your-project/
-└── design-source/
+└── .stateful-spec/
     ├── memory.md              # Current context — AI reads this first
     ├── project-definition.md  # Technology stack, conventions, quality gates
     ├── operations/            # Operation prompts (only if native agent commands aren't used)
@@ -110,11 +110,11 @@ your-project/
 
 ### Why This Matters
 
-- **Multi-developer continuity** — Any developer can onboard an AI assistant by pointing it to `design-source/memory.md`
+- **Multi-developer continuity** — Any developer can onboard an AI assistant by pointing it to `.stateful-spec/memory.md`
 - **Agent portability** — Works with any AI coding agent (Claude Code, Windsurf, Cursor, Codex, and others); switch agents without losing context
 - **Session persistence** — Work state survives across chat sessions without manual context restoration
 - **Iteration tracking** — Each feature, bugfix, or refactor has its own file with acceptance criteria and task checklists
-- **Version controlled** — The entire `design-source/` directory is committed to the repository
+- **Version controlled** — The entire `.stateful-spec/` directory is committed to the repository
 
 ### Key Files
 
@@ -129,7 +129,7 @@ The initialization prompts (`new-project.md`, `onboard-existing.md`) automatical
 ## Directory Structure
 
 ```
-design-source/
+.stateful-spec/
 ├── methodology/          # Core process documentation
 │   ├── overview.md       # This file
 │   ├── phases/           # Detailed guide for each phase
@@ -152,4 +152,4 @@ design-source/
 1. Read the [phase guides](phases/) to understand the workflow
 2. Use the [new-project prompt](../prompts/initialization/new-project.md) to bootstrap your project with an AI assistant — it will create the Project Definition and memory structure for you
 3. For existing projects, use the [onboard-existing prompt](../prompts/initialization/onboard-existing.md) to bring an AI up to speed
-4. Follow the iteration cycle for each unit of work, tracking progress in `design-source/history/`
+4. Follow the iteration cycle for each unit of work, tracking progress in `.stateful-spec/history/`
