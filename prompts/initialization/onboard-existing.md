@@ -123,7 +123,7 @@ Wait for approval.
 
 **Then always ask the developer to confirm:**
 
-> "I'm running as **[Agent Name]**. Would you like me to set up Stateful Spec prompts as native [Agent] commands? This lets you invoke them directly (e.g., `/resume-session`) instead of referencing files manually."
+> "I'm running as **[Agent Name]**. Would you like me to set up Stateful Spec prompts as native [Agent] commands? This lets you invoke them directly instead of opening files manually — for example: **Cursor** uses `@rule-name` for rules under `.cursor/rules/`; **Claude Code / Windsurf** often use slash commands such as `/resume-session`."
 >
 > 1. **Yes, use [Agent Name]**
 > 2. **Use a different agent** — I'll show you the supported list
@@ -171,15 +171,34 @@ description: <one-line description from the prompt>
 <prompt content>
 ```
 
-**Cursor** — Create `.cursor/rules/stateful-spec.mdc` with:
+**Cursor** — For **each** file in `prompts/operations/`, create `.cursor/rules/<name>.mdc` where `<name>` matches the source filename without `.md` (e.g. `resume-session.md` → `resume-session.mdc`). **Do not** create only a single umbrella rule — you must create **one `.mdc` per operation**, same as other agents get one file per prompt.
+
+Each `.mdc` file must contain Cursor rule frontmatter plus the full prompt body from the matching source file:
+
 ```yaml
 ---
-description: "Stateful Spec methodology — invoke with @stateful-spec"
+description: "<one-line description: use YAML `description` from the source prompt if present, otherwise derive from the first `#` heading>"
 alwaysApply: false
 ---
-<reference to .stateful-spec/methodology/>
+
+<full content of prompts/operations/<name>.md, unchanged>
 ```
-Also create an `AGENTS.md` at project root referencing the Stateful Spec methodology and operations.
+
+**Verify these nine files exist** (basenames must match exactly):
+
+| File | Invoked in chat as |
+|------|-------------------|
+| `.cursor/rules/resume-session.mdc` | `@resume-session` |
+| `.cursor/rules/save-session.mdc` | `@save-session` |
+| `.cursor/rules/create-technical-spec.mdc` | `@create-technical-spec` |
+| `.cursor/rules/write-tests.mdc` | `@write-tests` |
+| `.cursor/rules/debug-issue.mdc` | `@debug-issue` |
+| `.cursor/rules/refactor-code.mdc` | `@refactor-code` |
+| `.cursor/rules/review-changes.mdc` | `@review-changes` |
+| `.cursor/rules/write-commit-message.mdc` | `@write-commit-message` |
+| `.cursor/rules/update-documentation.mdc` | `@update-documentation` |
+
+Also create an **`AGENTS.md`** at project root referencing the Stateful Spec methodology, `.stateful-spec/project-definition.md`, and listing each operation with its `@name` (so discoverability matches the rules).
 
 **Codex** — Create `AGENTS.md` at project root with Stateful Spec methodology instructions. Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
 
@@ -195,8 +214,8 @@ description: <one-line description from the prompt>
 
 Do **NOT** create `.stateful-spec/operations/` — the prompts already live in the agent's native location.
 
-**Then tells the developer:**
-> "Stateful Spec is set up. I've created the `.stateful-spec/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands. You can now use `/resume-session`, `/save-session`, and other prompts directly."
+**Then tells the developer** (adapt the invocation examples to the agent — **Cursor:** emphasize `@resume-session`, `@save-session`, and the other seven rules under `.cursor/rules/`; **Claude Code / Windsurf / OpenCode:** mention slash commands or workflows as appropriate):
+> "Stateful Spec is set up. I've created the `.stateful-spec/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands."
 
 **If the developer skipped native commands (STEP 4):**
 
@@ -243,7 +262,7 @@ State the recommended phase and begin.
 2. **Project Definition** (`.stateful-spec/project-definition.md`) — generated and approved
 3. **Agent detection** (Step 4) — Code Agent identified and confirmed by developer
 4. **Stateful Spec structure** (`.stateful-spec/`) — created or verified
-5. **Operation prompts** — placed as native agent commands (if accepted) or in `.stateful-spec/operations/` (if skipped)
+5. **Operation prompts** — placed as native agent commands (if accepted) or in `.stateful-spec/operations/` (if skipped). **Cursor:** confirm nine `.mdc` files exist under `.cursor/rules/` (one per operation in `prompts/operations/`).
 6. **Iteration file** (`.stateful-spec/history/NNN-[name].md`) — with tasks and acceptance criteria
 7. **Task assessment** — recommended phase and initial analysis
 
@@ -251,4 +270,4 @@ State the recommended phase and begin.
 
 - Proceed with the recommended methodology phase
 - Update iteration checklists and memory as work progresses
-- Use `/save-session` (or `.stateful-spec/operations/save-session.md` if native commands were skipped) to save progress before ending a session
+- Use `@save-session` (Cursor), `/save-session` or the agent’s native equivalent, or `.stateful-spec/operations/save-session.md` if native commands were skipped, to save progress before ending a session

@@ -34,11 +34,22 @@ If the developer provides a summary, use it. Otherwise, generate a summary from 
 
 Read the following files:
 - `.stateful-spec/memory.md` — Current project memory
-- Active iteration file from `.stateful-spec/history/` (the one marked in-progress)
+- **Iteration files** in `.stateful-spec/history/` — identify the active one (status `in-progress` or referenced from memory.md **Active Work**), if any
+
+### STEP 2.5 — No active iteration file?
+
+If there was **substantial work** this session but **no** suitable iteration file exists (or none was in progress):
+
+- **Preferred:** Create a **retroactive** iteration file `.stateful-spec/history/NNN-[name].md` using `templates/implementation/iteration.md`, with description and tasks reflecting what was done, status `done` or `review`, and link any commits in **References**.
+- **Minimum:** Update `.stateful-spec/memory.md` only — add a row to **Recent Completions** or **Key Decisions** so the session is not lost.
+
+Then continue with STEP 3 if you now have an iteration file to update; otherwise skip to STEP 4 (memory-only save).
 
 ### STEP 3 — Update Iteration File
 
-Open the active iteration file and update it:
+**If there is no iteration file to update** (after STEP 2.5 you chose memory-only): skip to STEP 4.
+
+Open the active iteration file (when present) and update it:
 
 **Update the checklist:**
 - Mark completed tasks as done (`- [x]`)
@@ -81,13 +92,13 @@ Wait for confirmation before saving.
 
 ### STEP 5 — Confirm Save
 
-After updating both files, tell the developer:
+After updating `.stateful-spec/memory.md` and (if applicable) an iteration file, tell the developer:
 
 > "Session saved. Updated:"
-> - `.stateful-spec/history/[iteration-file].md` — [brief summary of changes]
+> - `.stateful-spec/history/[iteration-file].md` — [brief summary of changes, or "skipped — memory-only save"]
 > - `.stateful-spec/memory.md` — [brief summary of changes]
 >
-> "Next time, use `/resume-session` (or `.stateful-spec/operations/resume-session.md` if native commands aren't set up) to pick up where you left off."
+> "Next time, use `@resume-session` (Cursor), your agent’s resume command, or `.stateful-spec/operations/resume-session.md` if native commands aren’t set up, to pick up where you left off."
 
 ### STEP 6 — Suggest Commit (Optional)
 
@@ -104,7 +115,7 @@ If yes, stage and commit the .stateful-spec/ changes.
 
 After completing the save flow:
 
-1. **Iteration file updated** — Tasks checked off, decisions recorded
+1. **Iteration file updated** — Tasks checked off, decisions recorded (or retroactive file created in STEP 2.5, or skipped if memory-only)
 2. **Memory file updated** — Active work, completions, decisions persisted
 3. **Ready for next session** — Any developer can resume with full context
 

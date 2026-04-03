@@ -124,6 +124,8 @@ your-project/
 | `project-definition.md` | Technology stack, conventions, quality gates. The source of truth for how to build. |
 | `history/NNN-name.md` | One file per iteration. Contains description, acceptance criteria, task checklist, decisions. |
 
+Use iteration files for **each work unit** (feature, bugfix, refactor, or substantive doc/methodology change), not only for the first task after onboarding — see `prompts/operations/resume-session.md` (direct-task entry) if the session did not start with the initialization wizard.
+
 The initialization prompts (`new-project.md`, `onboard-existing.md`) automatically create and maintain this structure.
 
 ## Directory Structure
