@@ -43,10 +43,11 @@ Initialization prompts (`onboard-existing.md`, `new-project.md`) told agents to 
 
 ## Blockers & Notes
 
-- Commit for edited prompt files may still be pending locally; link commit in References when recorded.
+- _(none)_
 
 ## References
 
 - **Specification:** Analysis in plan `fix_cursor_operations_in_prompts` (conceptual)
-- **Files changed:** `prompts/initialization/onboard-existing.md`, `prompts/initialization/new-project.md`
+- **Files changed:** `prompts/initialization/onboard-existing.md`, `prompts/initialization/new-project.md`, `.stateful-spec/memory.md`, `.stateful-spec/history/001-fix-cursor-init-prompts.md`
+- **Commits:** `55c4c5d` — Fix Cursor init prompts to require per-operation rules
 - **Related:** Root cause — global “for each operation” vs old Cursor-only umbrella rule
