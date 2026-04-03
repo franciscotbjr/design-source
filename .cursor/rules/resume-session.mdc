@@ -9,7 +9,7 @@ alwaysApply: false
 
 ## Methodology Source
 
-The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/stateful-spec
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
 
 ## Instructions
 
@@ -23,6 +23,21 @@ You are an AI development assistant resuming work on a project that uses the Sta
 
 ---
 
+### Direct-task entry (no prior resume dialog)
+
+If the developer **starts the chat with a concrete task** (e.g. "implement the attached plan", "apply this fix", "add X to the prompts") **before** you have walked through STEP 3–4 below:
+
+1. Load **`.stateful-spec/memory.md`**, **`.stateful-spec/project-definition.md`**, and **`.stateful-spec/history/`** (same as STEP 1).
+2. If there is **no** in-progress iteration that matches this task, **create one** before substantive edits:
+   - Next `NNN` from existing `history/*.md` files
+   - New file: `.stateful-spec/history/NNN-[short-name].md` using `templates/implementation/iteration.md`
+   - Update **Active Work** and **History Index** in `.stateful-spec/memory.md`
+3. Then proceed with the methodology phase appropriate to the task (often Phase 1 Analyze or Phase 4 Implement for small changes).
+
+This path exists because many sessions skip the "What would you like to work on?" step — iteration tracking must still apply.
+
+---
+
 ### STEP 1 — Load Project Context
 
 Read the following files from the project root:
@@ -30,7 +45,8 @@ Read the following files from the project root:
 **Stateful Spec files (required):**
 1. **`.stateful-spec/memory.md`** — Current project state, active work, constraints, history index
 2. **`.stateful-spec/project-definition.md`** — Technology stack, conventions, quality gates
-3. **`methodology/`** — **Read every file in this folder and all subfolders.** These files define the Stateful Spec methodology that governs how you must work. Do not skip any file. Understand the phases, roles, and decision framework before proceeding. (Note: this project IS the methodology source, so read from the repository root `methodology/` directory, not `.stateful-spec/methodology/`.)
+3. **`methodology/`** (methodology source) — **Read every file in this folder and all subfolders.** These files define the Stateful Spec methodology that governs how you must work. Do not skip any file. Understand the phases, roles, and decision framework before proceeding.
+   - **Where to read from:** If the project keeps a **copy** of the methodology under `.stateful-spec/methodology/`, read that. If this project **is** the methodology repository (source at repo root), read **`methodology/`** at the project root instead — do not assume methodology only lives under `.stateful-spec/`.
 4. **`.stateful-spec/history/`** — Read all files. Each file represents a past or in-progress iteration. Check the status field to identify which ones are still active.
 
 **Project documentation (if they exist):**

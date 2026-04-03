@@ -140,3 +140,4 @@ Not applicable — documentation-only project.
 - New prompts must include clear instructions, expected inputs, and expected outputs
 - When modifying source prompts in `prompts/operations/`, the AI must also update the corresponding `.cursor/rules/<name>.mdc` file
 - When modifying methodology source files in `methodology/`, no sync is needed — `.stateful-spec/methodology/` references the source directly
+- Non-trivial work must use an iteration file under `.stateful-spec/history/` (see `AGENTS.md` Iteration tracking and `prompts/operations/resume-session.md`); update `memory.md` when starting or completing work

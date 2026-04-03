@@ -40,3 +40,14 @@ The following operations are available as Cursor rules (invoke with `@name`):
 4. When modifying existing content, minimize the diff — prefer targeted changes over rewrites
 5. Make small, logical commits that leave the repository in a working state
 6. Track iterations in `.stateful-spec/history/` and keep `.stateful-spec/memory.md` current
+
+### Iteration tracking
+
+For every **non-trivial** work unit (feature, bugfix, refactor, methodology or documentation change driven by a plan or spec), **before** substantive implementation:
+
+- Create `.stateful-spec/history/NNN-[kebab-name].md` using [`templates/implementation/iteration.md`](templates/implementation/iteration.md), where `NNN` is the next number after existing files in `history/`.
+- Update **Active Work** and **History Index** in `.stateful-spec/memory.md` when starting; move completed work to **Recent Completions** when done.
+
+**Trivial** edits may skip a new iteration file (e.g. typo fix, obvious one-line correction with no acceptance criteria). When in doubt, create an iteration file — it keeps `@save-session` and audits straightforward.
+
+If the session **starts with a direct task** (e.g. "implement this plan") instead of a full `@resume-session` dialog, still create or attach to an iteration file **before** implementing — see `prompts/operations/resume-session.md` (direct-task entry).

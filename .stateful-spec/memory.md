@@ -6,7 +6,7 @@
 
 - **Project:** Stateful Spec
 - **Description:** A specification-driven development methodology for AI-assisted software projects
-- **Last Updated:** 2026-04-03
+- **Last Updated:** 2026-04-04
 - **Current Status:** Active development
 
 ## Active Work
@@ -21,6 +21,7 @@ _(none)_
 
 | # | Name | Type | Completed |
 |---|------|------|-----------|
+| 002 | require-iteration-tracking | chore | 2026-04-04 |
 | 001 | fix-cursor-init-prompts | chore | 2026-04-03 |
 
 ## Key Decisions
@@ -30,6 +31,7 @@ _(none)_
 - This project is documentation-only (Markdown). There is no application code, build system, or runtime dependencies.
 - Operation prompts are placed as native Cursor rule files (`.cursor/rules/<name>.mdc`) rather than in `.stateful-spec/operations/`.
 - `.stateful-spec/methodology/` references the root `methodology/` directory rather than copying it, because this repo IS the methodology source. This avoids duplication drift in a self-referential project.
+- Non-trivial work must use an iteration file under `.stateful-spec/history/` (see `AGENTS.md` **Iteration tracking**); `resume-session` and `save-session` prompts describe direct-task entry and retroactive saves.
 
 ## Constraints & Reminders
 
@@ -47,4 +49,5 @@ _(none)_
 
 | # | Name | Type | Status | File |
 |---|------|------|--------|------|
+| 002 | require-iteration-tracking | chore | done | `history/002-require-iteration-tracking.md` |
 | 001 | fix-cursor-init-prompts | chore | done | `history/001-fix-cursor-init-prompts.md` |
