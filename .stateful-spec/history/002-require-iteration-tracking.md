@@ -47,4 +47,4 @@ Document and enforce that non-trivial work uses `.stateful-spec/history/NNN-*.md
 
 - **Plan:** `require_iteration_tracking` (conceptual)
 - **Files:** `AGENTS.md`, `prompts/operations/resume-session.md`, `prompts/operations/save-session.md`, `.stateful-spec/project-definition.md`, `methodology/overview.md`, `.cursor/rules/resume-session.mdc`, `.cursor/rules/save-session.mdc`
-- **Commits:** _(add hash after commit)_
+- **Commits:** `9499bc4` — Require iteration tracking for non-onboarding work
