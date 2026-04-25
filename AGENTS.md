@@ -21,7 +21,7 @@ Follow the 5-phase iteration cycle: **Analyze → Plan → Specify → Implement
 The following operations are available as native commands in supported tools:
 
 - **Cursor:** invoke with `@name` (rules in `.cursor/rules/`)
-- **Claude Code:** invoke with `/name` (commands in `.claude/commands/`)
+- **Claude Code / OpenClaude:** invoke with `/name` (commands in `.claude/commands/`)
 
 | Operation | Purpose |
 |-----------|---------|

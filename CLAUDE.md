@@ -1,6 +1,6 @@
 @AGENTS.md
 
-## Claude Code
+## Claude Code / OpenClaude
 
 Operation prompts are available as Claude Code commands. Invoke them with `/command-name`:
 

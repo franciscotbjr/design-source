@@ -55,7 +55,7 @@ stateful-spec/
 ├── examples/               # Community examples (placeholder)
 ├── .stateful-spec/         # Project memory instance (this project's own Stateful Spec)
 ├── .cursor/rules/          # Cursor-native operation prompts
-├── .claude/commands/       # Claude Code operation commands
+├── .claude/commands/       # Claude Code / OpenClaude operation commands
 ├── CLAUDE.md               # Claude Code entry point (imports AGENTS.md)
 ├── AGENTS.md
 ├── CHANGELOG.md
