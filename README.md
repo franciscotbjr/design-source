@@ -67,6 +67,7 @@ Once set up, these prompts are available in your project as native agent command
 
 - **Cursor:** `@resume-session`, `@save-session`, etc. (via `.cursor/rules/`)
 - **Claude Code / OpenClaude:** `/resume-session`, `/save-session`, etc. (via `.claude/commands/`)
+- **OpenCode:** `/resume-session`, `/save-session`, etc. (via `.opencode/commands/`)
 - **Other tools:** point your AI at the source files in `prompts/operations/`
 
 | Prompt | Purpose |

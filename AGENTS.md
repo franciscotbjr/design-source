@@ -22,6 +22,7 @@ The following operations are available as native commands in supported tools:
 
 - **Cursor:** invoke with `@name` (rules in `.cursor/rules/`)
 - **Claude Code / OpenClaude:** invoke with `/name` (commands in `.claude/commands/`)
+- **OpenCode:** invoke with `/name` (commands in `.opencode/commands/`)
 
 | Operation | Purpose |
 |-----------|---------|
@@ -35,7 +36,7 @@ The following operations are available as native commands in supported tools:
 | `write-commit-message` | Generate a well-structured commit message |
 | `update-documentation` | Update docs after implementing a change |
 
-Source prompts live in `prompts/operations/`. The tool-specific files (`.cursor/rules/`, `.claude/commands/`) mirror these sources.
+Source prompts live in `prompts/operations/`. The tool-specific files (`.cursor/rules/`, `.claude/commands/`, `.opencode/commands/`) mirror these sources.
 
 ## Rules for All Work
 
