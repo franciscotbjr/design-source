@@ -18,19 +18,24 @@ Follow the 5-phase iteration cycle: **Analyze → Plan → Specify → Implement
 
 ## Operation Prompts
 
-The following operations are available as Cursor rules (invoke with `@name`):
+The following operations are available as native commands in supported tools:
 
-| Rule | Purpose |
-|------|---------|
-| `@resume-session` | Resume work — loads project context and picks up where you left off |
-| `@save-session` | Save session progress — updates memory.md and iteration files |
-| `@create-technical-spec` | Write a technical specification for new work |
-| `@write-tests` | Generate tests for existing or new code |
-| `@debug-issue` | Diagnose and fix a bug with structured root cause analysis |
-| `@refactor-code` | Safely restructure code without changing behavior |
-| `@review-changes` | Self-review code changes before committing |
-| `@write-commit-message` | Generate a well-structured commit message |
-| `@update-documentation` | Update docs after implementing a change |
+- **Cursor:** invoke with `@name` (rules in `.cursor/rules/`)
+- **Claude Code:** invoke with `/name` (commands in `.claude/commands/`)
+
+| Operation | Purpose |
+|-----------|---------|
+| `resume-session` | Resume work — loads project context and picks up where you left off |
+| `save-session` | Save session progress — updates memory.md and iteration files |
+| `create-technical-spec` | Write a technical specification for new work |
+| `write-tests` | Generate tests for existing or new code |
+| `debug-issue` | Diagnose and fix a bug with structured root cause analysis |
+| `refactor-code` | Safely restructure code without changing behavior |
+| `review-changes` | Self-review code changes before committing |
+| `write-commit-message` | Generate a well-structured commit message |
+| `update-documentation` | Update docs after implementing a change |
+
+Source prompts live in `prompts/operations/`. The tool-specific files (`.cursor/rules/`, `.claude/commands/`) mirror these sources.
 
 ## Rules for All Work
 

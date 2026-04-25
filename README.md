@@ -63,7 +63,11 @@ This makes your project **self-contained** — any AI assistant can pick up wher
 
 ## Operation Prompts
 
-Once set up, these prompts are available in your project — either as native agent commands (e.g., `/resume-session` in Windsurf, Claude Code, etc.) or in `.stateful-spec/operations/`:
+Once set up, these prompts are available in your project as native agent commands:
+
+- **Cursor:** `@resume-session`, `@save-session`, etc. (via `.cursor/rules/`)
+- **Claude Code:** `/resume-session`, `/save-session`, etc. (via `.claude/commands/`)
+- **Other tools:** point your AI at the source files in `prompts/operations/`
 
 | Prompt | Purpose |
 |--------|---------|

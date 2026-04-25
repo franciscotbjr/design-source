@@ -55,6 +55,8 @@ stateful-spec/
 ├── examples/               # Community examples (placeholder)
 ├── .stateful-spec/         # Project memory instance (this project's own Stateful Spec)
 ├── .cursor/rules/          # Cursor-native operation prompts
+├── .claude/commands/       # Claude Code operation commands
+├── CLAUDE.md               # Claude Code entry point (imports AGENTS.md)
 ├── AGENTS.md
 ├── CHANGELOG.md
 ├── LICENSE
@@ -138,6 +140,6 @@ Not applicable — documentation-only project.
 - CHANGELOG entries must follow Keep a Changelog format
 - New presets must match the structure of `templates/project/project-definition.md`
 - New prompts must include clear instructions, expected inputs, and expected outputs
-- When modifying source prompts in `prompts/operations/`, the AI must also update the corresponding `.cursor/rules/<name>.mdc` file
+- When modifying source prompts in `prompts/operations/`, the AI must also update the corresponding `.cursor/rules/<name>.mdc` and `.claude/commands/<name>.md` files
 - When modifying methodology source files in `methodology/`, no sync is needed — `.stateful-spec/methodology/` references the source directly
 - Non-trivial work must use an iteration file under `.stateful-spec/history/` (see `AGENTS.md` Iteration tracking and `prompts/operations/resume-session.md`); update `memory.md` when starting or completing work
