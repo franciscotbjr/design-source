@@ -54,10 +54,11 @@ The AI assistant should **NOT**:
 
 ### Session Start
 
-1. AI reads the Project Definition
-2. AI reads any session context from a previous session (if resuming)
-3. Human states the current goal and phase
-4. Work begins
+1. Use `start-session` to create an iteration file and mark it as the Open Session
+2. If an Open Session is already active, use `resume-session` to pick it up instead
+3. AI reads the Project Definition and the open iteration context
+4. Human states the current goal and phase
+5. Work begins
 
 ### During a Session
 
@@ -69,8 +70,8 @@ The AI assistant should **NOT**:
 
 ### Session End
 
-1. Use the `save-session` prompt to save progress
-2. The AI updates `memory.md` with: decisions made, files changed, next steps, open blockers
+1. Use the `end-session` prompt to summarize and close the session
+2. The AI analyzes the Session Log, updates the iteration file, and moves work to Recent Completions
 3. Human reviews and commits the updates
 
 ## Communication Guidelines

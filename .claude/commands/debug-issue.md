@@ -41,6 +41,9 @@ I need help debugging an issue. Please help me find the root cause and fix it.
 {{ATTEMPTS_OR_NONE}}
 
 **Instructions:**
+
+**Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
+
 1. Analyze the error and the relevant code
 2. Identify the most likely root cause — explain your reasoning
 3. If you're not certain, list the top 2-3 possible causes ranked by likelihood
@@ -53,6 +56,8 @@ I need help debugging an issue. Please help me find the root cause and fix it.
 7. Suggest a regression test that would catch this bug in the future
 
 Do NOT make broad changes or refactor during debugging. Focus on understanding and fixing the specific issue.
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file summarizing the root cause and fix.
 
 <!-- To here -->
 

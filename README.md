@@ -73,6 +73,8 @@ Once set up, these prompts are available in your project as native agent command
 
 | Prompt | Purpose |
 |--------|---------|
+| `start-session.md` | Start a new implementation session |
+| `end-session.md` | End the current session and close the iteration |
 | `resume-session.md` | Pick up where you left off |
 | `save-session.md` | Save progress before ending a session |
 | `create-technical-spec.md` | Write a spec for new work |

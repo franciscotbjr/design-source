@@ -1,5 +1,5 @@
 ---
-description: "Self-review code changes before committing or creating a PR"
+description: "Self-review code changes before committing"
 alwaysApply: false
 ---
 
@@ -36,6 +36,8 @@ Please review the following code changes as if you were a code reviewer. Be thor
 
 Review the changes against these criteria:
 
+**Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
+
 1. **Correctness** — Does the code do what the spec says? Are there logic errors?
 2. **Completeness** — Are all acceptance criteria from the spec addressed? Anything missing?
 3. **Convention Compliance** — Does the code follow the Project Definition's naming, style, and patterns?
@@ -52,6 +54,8 @@ For each issue found, provide:
 - **Recommendation:** How to fix it
 
 If the changes look good, say so — don't invent issues.
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file summarizing the review findings (or confirming a clean review).
 
 ## Expected Output
 

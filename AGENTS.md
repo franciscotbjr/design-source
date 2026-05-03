@@ -28,6 +28,8 @@ The following operations are available as native commands in supported tools:
 
 | Operation | Purpose |
 |-----------|---------|
+| `start-session` | Start a new session — creates iteration file and marks it as open |
+| `end-session` | End the current session — summarizes work and closes the iteration |
 | `resume-session` | Resume work — loads project context and picks up where you left off |
 | `save-session` | Save session progress — updates memory.md and iteration files |
 | `create-technical-spec` | Write a technical specification for new work |
@@ -59,3 +61,9 @@ For every **non-trivial** work unit (feature, bugfix, refactor, methodology or d
 **Trivial** edits may skip a new iteration file (e.g. typo fix, obvious one-line correction with no acceptance criteria). When in doubt, create an iteration file — it keeps `@save-session` and audits straightforward.
 
 If the session **starts with a direct task** (e.g. "implement this plan") instead of a full `@resume-session` dialog, still create or attach to an iteration file **before** implementing — see `prompts/operations/resume-session.md` (direct-task entry).
+
+#### Session lifecycle
+
+Use `start-session` at the beginning of an implementation cycle to create an iteration file and mark it as the **Open Session** in `memory.md`. While a session is open, every operation prompt (spec writing, code review, documentation, debugging, etc.) registers its contributions to the Session Log of the open iteration file. Use `end-session` to summarize all work, close the iteration, and clear the Open Session flag.
+
+If an agent instance detects an Open Session in `memory.md`, it should maintain that session — appending entries and not creating competing iterations. If asked to start a new session while one is open, the agent must ask for approval to close the existing one first.

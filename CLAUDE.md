@@ -6,6 +6,8 @@ Operation prompts are available as Claude Code commands. Invoke them with `/comm
 
 | Command | Purpose |
 |---------|---------|
+| `/start-session` | Start a new session — creates iteration file and marks it as open |
+| `/end-session` | End the current session — summarizes work and closes the iteration |
 | `/resume-session` | Resume work — loads project context and picks up where you left off |
 | `/save-session` | Save session progress — updates memory.md and iteration files |
 | `/create-technical-spec` | Write a technical specification for new work |

@@ -38,6 +38,9 @@ Please write tests for the following code. Follow the project's testing conventi
 {{EXISTING_TESTS_OR_NONE}}
 
 **Instructions:**
+
+**Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
+
 1. Use the testing framework and patterns specified in the Project Definition
 2. Follow the project's test naming convention
 3. Write tests for:
@@ -50,6 +53,8 @@ Please write tests for the following code. Follow the project's testing conventi
 7. Keep tests focused — one assertion concept per test
 
 Place tests in the location specified by the Project Definition (co-located with source, tests/ directory, etc.).
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file summarizing what tests were written.
 
 <!-- To here -->
 

@@ -126,6 +126,16 @@ your-project/
 
 Use iteration files for **each work unit** (feature, bugfix, refactor, or substantive doc/methodology change), not only for the first task after onboarding — see `prompts/operations/resume-session.md` (direct-task entry) if the session did not start with the initialization wizard.
 
+### Session Lifecycle
+
+The `start-session` and `end-session` prompts create an explicit boundary for each implementation cycle:
+
+1. **Start Session** — Creates an iteration file and marks it as the **Open Session** in `memory.md`
+2. **Work** — All operation prompts (spec writing, code review, documentation, etc.) register contributions to the open iteration's Session Log
+3. **End Session** — Summarizes all work, closes the iteration, and clears the Open Session flag
+
+This ensures that even when the developer uses different agent instances for different operations, all contributions aggregate under the same iteration record.
+
 The initialization prompts (`new-project.md`, `onboard-existing.md`) automatically create and maintain this structure.
 
 ## Directory Structure

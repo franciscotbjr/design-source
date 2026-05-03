@@ -1,7 +1,3 @@
----
-description: Write a technical specification for new work
----
-
 # Prompt: Create Technical Specification
 
 ## Context
@@ -43,8 +39,11 @@ I need a technical specification for the following work. Please analyze the requ
 4. Include test scenarios for happy path, edge cases, AND error cases
 5. Follow the Project Definition's conventions for all code examples, naming, and patterns
 6. Flag anything you're unsure about as an open question rather than guessing
+7. **Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
 
 The specification should be detailed enough that someone could implement it without needing to ask clarifying questions.
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file summarizing what this specification covers.
 
 <!-- To here -->
 
