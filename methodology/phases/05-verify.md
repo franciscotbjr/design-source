@@ -94,4 +94,4 @@ The iteration is complete. Next steps:
 
 - **More milestones remaining?** — Return to [Phase 3: Specify](03-specify.md) for the next milestone
 - **New work unit?** — Return to [Phase 1: Analyze](01-analyze.md)
-- **Session ending?** — Use `prompts/operations/save-session.md` to generate a session summary
+- **Session ending?** — Use `prompts/operations/end-session.md` to summarize and close the session

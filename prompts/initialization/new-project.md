@@ -8,7 +8,7 @@ description: Interactive wizard to set up a new project with AI assistance
 
 ## Methodology Source
 
-The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/stateful-spec
 
 Key resources in the repository:
 
@@ -283,6 +283,9 @@ Create the `.stateful-spec/` directory structure at the project root. The operat
 
 4. **`.stateful-spec/history/`** — Create empty directory for iteration tracking
 
+5. **`AGENTS.md`** — Create at project root using [`templates/project/agents-md.md`](../../templates/project/agents-md.md) as the canonical template. This file is the universal entry point for all AI agents regardless of the native agent chosen. The template includes the operation table, agent invocation notes for all supported agents, and working conventions.
+   - **Note on ordering:** Create `AGENTS.md` from the template first, then **after** placing native commands in the next section, update the operation table and agent invocation notes in `AGENTS.md` to match the chosen agent's specific syntax (Cursor: `@name` under `.cursor/rules/`, Claude Code / OpenCode: `/name`, Windsurf: workflows, Codex: `AGENTS.md`-based, Antigravity: rules/workflows).
+
 **If the developer accepted native commands (STEP 8.5):**
 
 Create agent-native commands for each operation prompt from the Stateful Spec `prompts/operations/` folder. Adapt the format to match the agent's conventions:
@@ -328,9 +331,9 @@ alwaysApply: false
 | `.cursor/rules/write-commit-message.mdc` | `@write-commit-message` |
 | `.cursor/rules/update-documentation.mdc` | `@update-documentation` |
 
-Also create an **`AGENTS.md`** at project root referencing the Stateful Spec methodology, `.stateful-spec/project-definition.md`, and listing each operation with its `@name` (so discoverability matches the rules).
+After creating the `.cursor/rules/` files, ensure the `AGENTS.md` operation table lists each operation with its `@name` — so discoverability in `AGENTS.md` matches the actual `.cursor/rules/` commands.
 
-**Codex** — Create `AGENTS.md` at project root with Stateful Spec methodology instructions. Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
+**Codex** — `AGENTS.md` is already created above (see "Always create"). Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
 
 **Antigravity** — Create `.antigravity/rules.md` with Stateful Spec conventions and methodology references. Create workflow files in `.antigravity/workflows/` for each operation prompt.
 
@@ -346,7 +349,7 @@ Do **NOT** create `.stateful-spec/operations/` — the prompts already live in t
 
 Tell the developer (adapt the invocation examples to the agent — **Cursor:** emphasize `@resume-session`, `@save-session`, and the other seven rules under `.cursor/rules/`; **Claude Code / Windsurf / OpenCode:** mention slash commands or workflows as appropriate):
 
-> "I've created the `.stateful-spec/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands."
+> "I've created the `.stateful-spec/` folder with project memory and methodology, placed operation prompts as native [Agent] commands, and created `AGENTS.md` at the project root."
 
 **If the developer skipped native commands (STEP 8.5):**
 
@@ -356,7 +359,7 @@ Also create:
 
 Tell the developer:
 
-> "I've created the `.stateful-spec/` folder with project memory, operation prompts, and the Stateful Spec methodology. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Stateful Spec repository."
+> "I've created the `.stateful-spec/` folder with project memory, operation prompts, and the Stateful Spec methodology. I've also created `AGENTS.md` at the project root. This will be versioned with your code so any developer or AI assistant can pick up where you left off without needing access to the Stateful Spec repository."
 
 ### STEP 9 — First Feature
 

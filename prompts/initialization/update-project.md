@@ -8,7 +8,7 @@ description: Update Stateful Spec methodology and related files in an already co
 
 ## Methodology Source
 
-The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/stateful-spec
 
 You may also use a fork, a local clone path, or another URL if the developer provides one.
 
@@ -47,7 +47,7 @@ You are an AI assistant helping **update** Stateful Spec in a project that is al
 **AI does:**
 
 - Ask which **source** to use for the new Stateful Spec content, or propose defaults:
-  - Public repo URL (e.g. design-source / stateful-spec)
+  - Public repo URL (e.g. stateful-spec / stateful-spec)
   - A **local folder** path (clone on disk)
   - A **fork** URL
 
@@ -59,7 +59,7 @@ Try to read key paths from that source (`methodology/overview.md`, `CHANGELOG.md
 
 > "Which source should we treat as the **authoritative** Stateful Spec for this update?"
 >
-> 1. **Default upstream** — `https://github.com/franciscotbjr/design-source` (or the URL you have in context)
+> 1. **Default upstream** — `https://github.com/franciscotbjr/stateful-spec` (or the URL you have in context)
 > 2. **Local path** — I’ll use a folder you specify
 > 3. **Other URL** — fork or mirror
 
@@ -103,7 +103,7 @@ Inspect and summarize:
 |------|----------------|
 | Methodology | Full **copy** under `.stateful-spec/methodology/` vs **reference-only** (e.g. `README` pointing at repo root `methodology/`) |
 | Operations | **`.stateful-spec/operations/`** present (copied prompts) vs **native agent rules** only (e.g. `.cursor/rules/*.mdc`, `.claude/commands/`, etc.) |
-| Root docs | **`AGENTS.md`** present? Lists operations or methodology paths? |
+| Root docs | **`AGENTS.md`** present? Lists operations or methodology paths? If **missing**, flag it for creation during apply — this is always required regardless of scope. |
 | Vendored prompts | Any **`prompts/`** tree inside *this* project (full or partial copy from Stateful Spec) |
 | Git | Dirty working tree? Current branch? (recommend branch for update) |
 
@@ -132,7 +132,7 @@ Propose a scope based on inventory and typical needs; keep options clear.
 >
 > 1. **Methodology only** — refresh `methodology/` (under `.stateful-spec/methodology/` and/or align root `methodology/` per project layout)
 > 2. **Methodology + operation prompts** — methodology plus `prompts/operations/` (if vendored or copied) and **sync** native agent rules (e.g. `.cursor/rules/*.mdc` from source prompts) per Project Definition
-> 3. **Full refresh** — methodology + operations + note for **templates** (copy or diff `templates/` if the project vendors them) + refresh **`AGENTS.md`** sections that list rules if the list changed
+> 3. **Full refresh** — methodology + operations + note for **templates** (copy or diff `templates/` if the project vendors them)
 > 4. **Project Definition template only** — pull in changes from `templates/project/project-definition.md` into discussion; merge into **`.stateful-spec/project-definition.md`** only with explicit developer approval (does not auto-wipe custom sections)
 
 Wait for the choice. If **4**, ask which sections they want to align and show a short diff plan before editing.
@@ -183,7 +183,11 @@ Wait for the answer.
 
 **AI does:**
 
-According to scope and project layout:
+**Always (regardless of scope):**
+
+- Refresh or create **`AGENTS.md`** — if absent, create it from scratch using [`templates/project/agents-md.md`](../../templates/project/agents-md.md) as the canonical template, then update lists of operations, methodology paths, Getting Started bullets, and agent invocation notes if upstream prompts changed those conventions. Ensure the operation table and rules match the current methodology version.
+
+**According to scope and project layout:**
 
 1. **Methodology**
    - If the project keeps a **copy** under `.stateful-spec/methodology/`: replace or merge files from source `methodology/` (preserve any local `README` that explains reference-only layout if still used)
@@ -191,12 +195,9 @@ According to scope and project layout:
 
 2. **Operation prompts**
    - If **`prompts/operations/`** exists in the project: sync from source `prompts/operations/`
-   - If the Project Definition requires **agent parity** (e.g. “when modifying `prompts/operations/`, update `.cursor/rules/<name>.mdc`”): update each corresponding native rule file
+   - If the Project Definition requires **agent parity** (e.g. "when modifying `prompts/operations/`, update `.cursor/rules/<name>.mdc`"): update each corresponding native rule file
 
-3. **`AGENTS.md`**
-   - Refresh lists of operations, methodology paths, or Getting Started bullets if upstream prompts changed those conventions
-
-4. **Templates** (if full refresh)
+3. **Templates** (if full refresh)
    - If the project vendors `templates/`, merge or copy from source; call out conflicts
 
 Show a **short summary of edits** (files touched) before saving.

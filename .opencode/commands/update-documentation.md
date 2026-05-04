@@ -1,7 +1,3 @@
----
-description: Update docs after implementing a change
----
-
 # Prompt: Update Documentation
 
 ## Context
@@ -35,6 +31,8 @@ Please help me update the project documentation after the following changes.
 
 For each documentation file below, determine if it needs updating and produce the updated content:
 
+**Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
+
 1. **README.md** — Does the change affect setup instructions, usage examples, API surface, or feature list? If yes, provide the updated sections.
 
 2. **CHANGELOG.md** — Add an entry for this change under the current version. Use this format:
@@ -51,6 +49,8 @@ For each documentation file below, determine if it needs updating and produce th
 5. **Other** — Are there any other docs that should be updated? (e.g., deployment guides, configuration docs)
 
 For each file, either provide the full updated content or clearly mark the sections that changed.
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file summarizing which documents were updated.
 
 <!-- To here -->
 

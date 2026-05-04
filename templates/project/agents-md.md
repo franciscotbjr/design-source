@@ -1,4 +1,4 @@
-# Stateful Spec — AI Agent Instructions
+# [Project Name] — AI Agent Instructions
 
 This project uses the **Stateful Spec** methodology for AI-assisted development.
 
@@ -6,7 +6,7 @@ This project uses the **Stateful Spec** methodology for AI-assisted development.
 
 1. **Read `.stateful-spec/memory.md`** — your entry point for current project state
 2. **Read `.stateful-spec/project-definition.md`** — technology stack, conventions, quality gates
-3. **Read `methodology/`** — the full methodology (phases, roles, decision framework). This project IS the methodology source, so read from the root — not from `.stateful-spec/methodology/`.
+3. **Read `.stateful-spec/methodology/`** — the full methodology (phases, roles, decision framework)
 
 To **refresh** methodology, prompts, or agent rules from upstream in an already configured repo, use [`prompts/initialization/update-project.md`](prompts/initialization/update-project.md).
 
@@ -14,9 +14,9 @@ To **refresh** methodology, prompts, or agent rules from upstream in an already 
 
 Follow the 5-phase iteration cycle: **Analyze → Plan → Specify → Implement → Verify**
 
-- Phase guides: `methodology/phases/`
-- Roles and boundaries: `methodology/roles.md`
-- Decision framework: `methodology/decision-framework.md`
+- Phase guides: `.stateful-spec/methodology/phases/`
+- Roles and boundaries: `.stateful-spec/methodology/roles.md`
+- Decision framework: `.stateful-spec/methodology/decision-framework.md`
 
 ## Operation Prompts
 
@@ -55,14 +55,14 @@ Source prompts live in `prompts/operations/`. The tool-specific files (`.cursor/
 
 For every **non-trivial** work unit (feature, bugfix, refactor, methodology or documentation change driven by a plan or spec), **before** substantive implementation:
 
-- Create `.stateful-spec/history/NNN-[kebab-name].md` using [`templates/implementation/iteration.md`](templates/implementation/iteration.md), where `NNN` is the next number after existing files in `history/`.
+- Create `.stateful-spec/history/NNN-[kebab-name].md` using `templates/implementation/iteration.md`, where `NNN` is the next number after existing files in `history/`.
 - Update **Active Work** and **History Index** in `.stateful-spec/memory.md` when starting; move completed work to **Recent Completions** when done.
 
-**Trivial** edits may skip a new iteration file (e.g. typo fix, obvious one-line correction with no acceptance criteria). When in doubt, create an iteration file — it keeps `@save-session` and audits straightforward.
+**Trivial** edits may skip a new iteration file (e.g. typo fix, obvious one-line correction with no acceptance criteria). When in doubt, create an iteration file — it keeps audits straightforward.
 
-If the session **starts with a direct task** (e.g. "implement this plan") instead of a full `@resume-session` dialog, still create or attach to an iteration file **before** implementing — see `prompts/operations/resume-session.md` (direct-task entry).
+If the session **starts with a direct task** (e.g. "implement this plan") instead of a full session-resume dialog, still create or attach to an iteration file **before** implementing.
 
-#### Session lifecycle
+### Session lifecycle
 
 Use `start-session` at the beginning of an implementation cycle to create an iteration file and mark it as the **Open Session** in `memory.md`. While a session is open, every operation prompt (spec writing, code review, documentation, debugging, etc.) registers its contributions to the Session Log of the open iteration file. Use `end-session` to summarize all work, close the iteration, and clear the Open Session flag.
 

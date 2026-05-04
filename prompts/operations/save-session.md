@@ -16,6 +16,8 @@ You are helping the developer save their session progress. Your job is to update
 - Update the active iteration file with completed tasks
 - Ensure nothing is lost between sessions
 
+> **Note:** `save-session` preserves the current cycle open. To definitively close an implementation cycle, use `end-session` instead.
+
 ---
 
 ### STEP 1 — Review Session Work
@@ -33,8 +35,8 @@ If the developer provides a summary, use it. Otherwise, generate a summary from 
 ### STEP 2 — Read Current State
 
 Read the following files:
-- `.stateful-spec/memory.md` — Current project memory
-- **Iteration files** in `.stateful-spec/history/` — identify the active one (status `in-progress` or referenced from memory.md **Active Work**), if any
+- `.stateful-spec/memory.md` — Current project memory. If an **Open Session** is active, use the iteration file referenced there — this is the primary iteration to update.
+- **Iteration files** in `.stateful-spec/history/` — if no Open Session exists, identify the active one (status `in-progress` or referenced from memory.md **Active Work**), if any
 
 ### STEP 2.5 — No active iteration file?
 
@@ -58,6 +60,9 @@ Open the active iteration file (when present) and update it:
 
 **Add decisions:**
 - Record any decisions made during this session in the Decisions table
+
+**Append to Session Log:**
+- If the iteration file has a **Session Log** section, append a timestamped entry summarizing what was accomplished
 
 **Update status:**
 - If all acceptance criteria are met, change status to `done`

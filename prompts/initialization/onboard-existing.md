@@ -8,7 +8,7 @@ description: Onboard AI assistant to an existing codebase with guided discovery
 
 ## Methodology Source
 
-The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/stateful-spec
 
 Key resources:
 - `presets/` — Pre-filled Project Definitions for common stacks (use as base if stack matches)
@@ -150,8 +150,10 @@ Create the `.stateful-spec/` directory structure. The operation prompts placemen
 2. **`.stateful-spec/project-definition.md`** — Save the approved Project Definition
 3. **`.stateful-spec/methodology/`** — Copy the entire `methodology/` folder from Stateful Spec, including all subfolders
 4. **`.stateful-spec/history/`** — Create empty directory
+5. **`AGENTS.md`** — Create at project root using [`templates/project/agents-md.md`](../../templates/project/agents-md.md) as the canonical template. This file is the universal entry point for all AI agents regardless of the native agent chosen. The template includes the operation table, agent invocation notes for all supported agents, and working conventions.
+   - **Note on ordering:** Create `AGENTS.md` from the template first, then **after** placing native commands in the next section, update the operation table and agent invocation notes in `AGENTS.md` to match the chosen agent's specific syntax (Cursor: `@name` under `.cursor/rules/`, Claude Code / OpenCode: `/name`, Windsurf: workflows, Codex: `AGENTS.md`-based, Antigravity: rules/workflows).
 
-**If `.stateful-spec/` already exists** (partial setup): check for missing pieces and create only what's missing.
+**If `.stateful-spec/` already exists** (partial setup): check for missing pieces (including `AGENTS.md`) and create only what's missing.
 
 **If the developer accepted native commands (STEP 4):**
 
@@ -198,9 +200,9 @@ alwaysApply: false
 | `.cursor/rules/write-commit-message.mdc` | `@write-commit-message` |
 | `.cursor/rules/update-documentation.mdc` | `@update-documentation` |
 
-Also create an **`AGENTS.md`** at project root referencing the Stateful Spec methodology, `.stateful-spec/project-definition.md`, and listing each operation with its `@name` (so discoverability matches the rules).
+After creating the `.cursor/rules/` files, ensure the `AGENTS.md` operation table lists each operation with its `@name` — so discoverability in `AGENTS.md` matches the actual `.cursor/rules/` commands.
 
-**Codex** — Create `AGENTS.md` at project root with Stateful Spec methodology instructions. Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
+**Codex** — `AGENTS.md` is already created above (see "Always create"). Codex discovers `AGENTS.md` files automatically from the project root down to the current directory. Optionally configure `.codex/config.toml` for model preferences.
 
 **Antigravity** — Create `.antigravity/rules.md` with Stateful Spec conventions and methodology references. Create workflow files in `.antigravity/workflows/` for each operation prompt.
 
@@ -215,14 +217,14 @@ description: <one-line description from the prompt>
 Do **NOT** create `.stateful-spec/operations/` — the prompts already live in the agent's native location.
 
 **Then tells the developer** (adapt the invocation examples to the agent — **Cursor:** emphasize `@resume-session`, `@save-session`, and the other seven rules under `.cursor/rules/`; **Claude Code / Windsurf / OpenCode:** mention slash commands or workflows as appropriate):
-> "Stateful Spec is set up. I've created the `.stateful-spec/` folder with project memory and methodology, and placed operation prompts as native [Agent] commands."
+> "Stateful Spec is set up. I've created the `.stateful-spec/` folder with project memory and methodology, placed operation prompts as native [Agent] commands, and created `AGENTS.md` at the project root."
 
 **If the developer skipped native commands (STEP 4):**
 
 Create `.stateful-spec/operations/` — Copy the entire `prompts/operations/` folder from Stateful Spec.
 
 **Then tells the developer:**
-> "Stateful Spec is set up. The `.stateful-spec/` folder contains your project memory, operation prompts, and methodology — all versioned with your code. Any AI assistant can now pick up where you left off."
+> "Stateful Spec is set up. The `.stateful-spec/` folder contains your project memory, operation prompts, and methodology — all versioned with your code. I've also created `AGENTS.md` at the project root, so any AI agent can discover the setup. Any AI assistant can now pick up where you left off."
 
 ### STEP 5 — What Do You Need?
 

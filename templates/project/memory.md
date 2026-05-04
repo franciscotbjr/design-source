@@ -15,6 +15,15 @@
 
 - [ ] [Brief description] → `history/NNN-name.md`
 
+## Open Session
+
+> When a session is active, this section points to the current iteration file.
+> Managed by `start-session` and `end-session` — do not edit manually.
+>
+> **Relationship to Active Work:** Open Session holds at most one iteration (the current implementation cycle). Active Work lists all work items in progress — the Open Session entry should also appear in Active Work while open. `end-session` moves it from Active Work to Recent Completions and clears Open Session.
+
+_(none)_
+
 ## Recent Completions
 
 > Last 3-5 completed iterations for quick context.

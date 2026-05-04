@@ -38,6 +38,9 @@ I need to refactor the following code. The refactoring must NOT change any exter
 {{DESIRED_STRUCTURE_OR_NONE}}
 
 **Instructions:**
+
+**Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
+
 1. Analyze the current code and identify the specific problems
 2. Propose a refactoring plan with ordered steps — each step should be independently committable
 3. For each step, explain what changes and why
@@ -50,6 +53,8 @@ I need to refactor the following code. The refactoring must NOT change any exter
 7. Do NOT change any public API, interface, or behavior unless explicitly discussed
 
 If you think the refactoring should also change behavior (e.g., fix a bug discovered during refactoring), flag it separately — do not mix behavior changes with structural refactoring.
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file summarizing what was refactored.
 
 <!-- To here -->
 

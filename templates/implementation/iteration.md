@@ -42,6 +42,18 @@
 - [ ] Documentation updated (if applicable)
 - [ ] No debug code or TODOs left behind
 
+## Session Log
+
+> Timestamped entries recording each operation performed during this session.
+> Agents append entries automatically when an Open Session is active.
+
+| Timestamp | Operation | Summary |
+|-----------|-----------|---------|
+
+> **Timestamp format:** `YYYY-MM-DD HH:MM` (local time). Example: `2026-05-03 14:30 | start-session | Session opened for feature work.`
+>
+> **Note:** Iterations created prior to the session management feature may lack this section. This is expected and does not require migration.
+
 ## Decisions Made
 
 > Decisions made during this iteration. Include rationale.

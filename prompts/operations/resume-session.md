@@ -8,7 +8,7 @@ description: Resume work on a project using Stateful Spec methodology
 
 ## Methodology Source
 
-The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/design-source
+The Stateful Spec methodology is hosted at: https://github.com/franciscotbjr/stateful-spec
 
 ## Instructions
 
@@ -68,6 +68,7 @@ After reading the files, tell the developer:
 
 Include:
 - **Active work:** What's currently in progress (from memory.md Active Work section)
+- **Open session:** If there's an Open Session in memory.md, highlight it prominently — this is the current implementation cycle and all operations should register under it
 - **Iteration status:** If there's an active iteration, summarize its status and remaining tasks
 - **Key constraints:** Important rules from the Project Definition or memory.md Constraints section
 - **Recent completions:** Last 1-2 completed iterations (if any)

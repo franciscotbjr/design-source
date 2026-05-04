@@ -1,0 +1,100 @@
+---
+description: "End the current session by summarizing work and closing the iteration"
+alwaysApply: false
+---
+
+# End Session
+
+> Use at the end of an implementation cycle. The AI analyzes the open session, summarizes all work, closes the iteration, and clears the Open Session flag.
+
+## Instructions
+
+You are helping the developer end a work session. Your job is to review everything that happened during the open session, summarize it, mark the iteration as complete, and clear the Open Session flag so the next session starts fresh.
+
+**Your role:**
+- Confirm the developer wants to end the session
+- Analyze the open iteration file and any Session Log entries
+- Summarize the work
+- Close the iteration and clear the Open Session flag
+
+---
+
+### STEP 1 — Check for Open Session
+
+Read `.stateful-spec/memory.md`.
+
+Look for the **Open Session** section. If it shows `_(none)_` or the section doesn't exist:
+
+> "I don't see an open session. Would you like me to start one with `start-session`, or should I do a regular `save-session`?"
+
+- If the developer says **start one**, switch to the `start-session.md` workflow.
+- If the developer says **save-session**, switch to the `save-session.md` workflow.
+- If neither, stop here.
+
+### STEP 2 — Read the Open Iteration
+
+Read the iteration file referenced in the Open Session section (e.g., `.stateful-spec/history/NNN-name.md`).
+
+Gather:
+- **Description** — What was being worked on
+- **Session Log** — All timestamped entries from different operations
+- **Implementation Tasks** — What was checked off
+- **Decisions Made** — Any decisions recorded
+- **Acceptance Criteria** — Were they all met?
+
+### STEP 3 — Ask for Confirmation
+
+Show the developer a summary:
+
+> "Here's what I found in the open session `[iteration-file]`:"
+> - **Started:** [created date]
+> - **Operations logged:** [list of operations from Session Log]
+> - **Tasks completed:** [summary of checked tasks]
+> - **Acceptance criteria met:** [which ones are done? which are not?]
+>
+> "Would you like to end this session? (yes/no)"
+
+If the developer says **no**, stop here. The session remains open.
+
+### STEP 4 — Summarize and Close
+
+1. **Update the iteration file:**
+   - Add a final Session Log entry: `Now | end-session | Session closed. [Summary of all work done.]`
+   - Mark **Status** as `done` (or `review` if not all criteria met)
+   - Fill **Completed** date with today's date
+
+2. **Update `memory.md`:**
+   - **Open Session** — Set back to `_(none)_`
+   - **Active Work** — Move the completed item to **Recent Completions**
+   - **History Index** — Update the iteration's status to `done`
+
+### STEP 5 — Confirm Close
+
+Tell the developer:
+
+> "Session closed: `history/NNN-name.md`"
+> - All operations from this session are summarized in the iteration file.
+> - The next `start-session` will create a new, separate iteration.
+
+### STEP 6 — Suggest Commit (Optional)
+
+If there are uncommitted changes, ask:
+
+> "Would you like me to commit these session updates? Suggested message:"
+> ```
+> chore: close session for [iteration name]
+> ```
+
+If yes, stage and commit.
+
+## Output
+
+After completing the end flow:
+
+1. **Iteration closed** — Status marked as done, all contributions summarized
+2. **Open Session cleared** — memory.md ready for next session
+3. **Recent Completions updated** — Work is visible in project history
+
+## Next Steps
+
+- Start the next session with `start-session` when beginning a new implementation cycle

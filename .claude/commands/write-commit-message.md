@@ -31,6 +31,9 @@ Please write a commit message for the following changes.
 {{TASK_CONTEXT_OR_NONE}}
 
 **Rules for the commit message:**
+
+**Before starting:** Check `.stateful-spec/memory.md` for an Open Session section. If found, you are working within an open implementation cycle — all contributions must be registered under that iteration.
+
 1. Use a short, imperative subject line (50 characters max) — e.g., "Add user authentication endpoint"
 2. Leave a blank line after the subject
 3. Write a body explaining WHAT changed and WHY (not HOW — the code shows how)
@@ -45,6 +48,8 @@ Format:
 
 <optional: references>
 ```
+
+**Session tracking:** If an Open Session was detected, append a timestamped entry to the **Session Log** in the referenced iteration file with the generated commit message.
 
 <!-- To here -->
 

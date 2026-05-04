@@ -6,14 +6,21 @@
 
 - **Project:** Stateful Spec
 - **Description:** A specification-driven development methodology for AI-assisted software projects
-- **Last Updated:** 2026-04-25
+- **Last Updated:** 2026-05-03
 - **Current Status:** Active development
 
 ## Active Work
 
 > What is currently in progress? Reference the iteration file.
 
-_(none)_
+- [ ] New Session Management — `history/005-new-session-management.md`
+
+## Open Session
+
+> When a session is active, this section points to the current iteration file.
+> Managed by `start-session` and `end-session` — do not edit manually.
+
+- [005] New Session Management → `history/005-new-session-management.md`
 
 ## Recent Completions
 
@@ -51,6 +58,8 @@ _(none)_
 
 | # | Name | Type | Status | File |
 |---|------|------|--------|------|
+| 006 | universal-agents-md | fix | done | `history/006-universal-agents-md.md` |
+| 005 | new-session-management | feature | in-progress | `history/005-new-session-management.md` |
 | 004 | add-claude-code-support | feature | done | `history/004-add-claude-code-support.md` |
 | 002 | require-iteration-tracking | chore | done | `history/002-require-iteration-tracking.md` |
 | 003 | add-update-project-wizard | feature | done | `history/003-add-update-project-wizard.md` |
